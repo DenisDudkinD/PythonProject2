@@ -14,7 +14,7 @@ class SQLCastRepository(CastRepositoryProtocol):
         return self.session.query(Cast).all()
     
     def get_specific_cast(self,movie_id:str,actor_id:str)->Cast:
-        return self.session.query(Cast).filter(Cast.movie_id == movie_id,Cast.actor_id == actor_id).one()
+        return self.session.get(Cast,(movie_id, actor_id))
 
     def get_cast_by_movie(self,movie_id:str)-> list[Cast]:
         return self.session.query(Cast).filter(Cast.movie_id == movie_id).all()

@@ -1,16 +1,15 @@
 from typing import Protocol
-from uuid import UUID
 
 from src.domain.movie import Movie
 
 class MovieRepositoryProtocol(Protocol):
-    def add_movie(self, movie: Movie) -> Movie:
+    def add_movie(self, movie: Movie) -> str:
         ...
     def get_all_movies(self) -> list[Movie]:
         ...
     def find_movies_by_title(self, query:str) -> list[Movie]:
         ...
-    def remove_movie(self, movie: Movie) -> bool:
+    def remove_movie(self, movie_id: str) -> None:
         ...
-    def update_movie(self, movie: Movie) -> bool:
+    def update_movie(self, movie: Movie) -> None:
         ...

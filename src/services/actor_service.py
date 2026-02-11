@@ -1,0 +1,29 @@
+from src.domain.actor import Actor
+from src.repositories.actor_repository import ActorRepositoryProtocol
+
+class StudioService:
+    def __init__(self, repo: ActorRepositoryProtocol):
+        self.repo = repo
+
+    def get_all_studios(self) -> list[Actor]:
+        return self.repo.get_all_actors()
+
+    def add_actor(self, actor:Actor) -> str:
+        if not isinstance(actor, Actor):
+            raise TypeError("Expected actor, got something else")
+        return self.repo.add_actor(actor)
+
+    def get_actor_by_name(self, query: str) -> list[Actor]:
+        if not isinstance(query, str):
+            raise TypeError("Expected str, got something else")
+        return self.repo.get_actor_by_name(query.strip().title())
+
+    def remove_actor_by_id(self, actor_id:str):
+        if not isinstance(actor_id, str):
+            raise TypeError("Expected str, got something else")
+        self.repo.remove_actor_by_id(actor_id)
+
+    def update_actor(self, actor:Actor):
+        if not isinstance(actor, actor):
+            raise TypeError("Expected actor, got something else")
+        self.repo.update_actor(actor)

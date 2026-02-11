@@ -14,7 +14,7 @@ class Movie(Base):
     title = Column(String, nullable=False)
     released_date = Column(DateTime, default=datetime.now(timezone.utc))
     runtime_minutes = Column(Integer, nullable=True)
-    rating = Column(Integer, nullable=True)
+    rating = Column(String, nullable=True)
 
     sequel_to_movie_id = Column(UUID(as_uuid=True),ForeignKey("movies.movie_id"), nullable=True)
 

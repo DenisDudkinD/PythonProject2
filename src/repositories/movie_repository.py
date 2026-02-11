@@ -10,17 +10,25 @@ class MovieRepository(MovieRepositoryProtocol):
     def add_movie(self, movie: Movie):
         self.session.add(movie)
         self.session.commit()
+        self.session.refresh(movie)
+        return movie
     
     def get_all_movies(self) -> list[Movie]:
-        return  self.session.query(Movie).all
+        return  self.session.query(Movie).all()
     
     def find_movies_by_title(self, query: str) -> list[Movie]:
         return self.session.query(Movie).filter(Movie.title == query).all()
     
     def remove_movie(self, movie: Movie):
+        if movie is None:
+            return False
         self.session.delete(movie)
         self.session.commit()
+        return True
 
     def update_movie(self, movie: Movie):
+        if movie is None:
+            return False
         self.session.merge(movie)
         self.session.commit()
+        return True

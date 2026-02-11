@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, ForeignKey, Integer
+from datetime import date
+from sqlalchemy import Column, String, Date, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from src.base import Base
 
@@ -11,10 +11,10 @@ class Movie(Base):
 
     studio_id = Column(UUID(as_uuid=True),ForeignKey("studios.studio_id"), nullable=False)
 
-    title = Column(String, nullable=False)
-    released_date = Column(DateTime, default=datetime.now(timezone.utc))
+    title = Column(String(200), nullable=False)
+    released_date = Column(Date, default=date.today)
     runtime_minutes = Column(Integer, nullable=True)
-    rating = Column(String, nullable=True)
+    rating = Column(String(10), nullable=True)
 
     sequel_to_movie_id = Column(UUID(as_uuid=True),ForeignKey("movies.movie_id"), nullable=True)
 

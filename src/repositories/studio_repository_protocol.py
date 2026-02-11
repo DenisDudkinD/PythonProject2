@@ -1,5 +1,5 @@
 from typing import Protocol
-from src.domain.Studio import Studio
+from src.domain.studio import Studio
 
 class StudioRepositoryProtocol(Protocol):
     def add_studio(self, studio:Studio) -> str:

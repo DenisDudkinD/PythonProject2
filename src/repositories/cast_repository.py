@@ -8,13 +8,13 @@ class SQLCastRepository(CastRepositoryProtocol):
 
     def add_cast(self, cast:Cast) -> None:
         self.session.add(cast)
-
+        self.session.commit()
 
     def get_all_casts(self) -> list[Cast]:
         return self.session.query(Cast).all()
     
     def get_specific_cast(self,movie_id:str,actor_id:str)->Cast:
-        return self.session.query(Cast).filter(Cast.movie_id == movie_id,Cast.actor_id == actor_id).one()
+        return self.session.get(Cast,(movie_id, actor_id))
 
     def get_cast_by_movie(self,movie_id:str)-> list[Cast]:
         return self.session.query(Cast).filter(Cast.movie_id == movie_id).all()
@@ -24,8 +24,9 @@ class SQLCastRepository(CastRepositoryProtocol):
         if cast is None:
             raise ValueError("Cast Not Found")
         self.session.delete(cast)
+        self.session.commit()
 
     def update_cast(self,cast:Cast) -> None:
         self.session.merge(cast)
-
+        self.session.commit()
 

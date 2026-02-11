@@ -9,8 +9,8 @@ class SQLActorRepository(ActorRepositoryProtocol):
 
     def add_actor(self, actor:Actor) -> None:
         self.session.add(actor)
-
-
+        self.session.commit()
+        
     def get_all_actors(self) -> list[Actor]:
         return self.session.query(Actor).all()
     
@@ -22,9 +22,10 @@ class SQLActorRepository(ActorRepositoryProtocol):
         if actor is None:
             raise ValueError("Actor Not Found")
         self.session.delete(actor)
-
+        self.session.commit()
 
     def update_actor(self,actor:Actor)-> None:
         self.session.merge(actor)
+        self.session.commit()
 
 

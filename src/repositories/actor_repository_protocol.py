@@ -1,5 +1,5 @@
 from typing import Protocol
-from src.domain.Actor import Actor
+from src.domain.actor import Actor
 
 class ActorRepositoryProtocol(Protocol):
     def add_actor(self, actor:Actor):

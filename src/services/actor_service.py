@@ -5,7 +5,7 @@ class StudioService:
     def __init__(self, repo: ActorRepositoryProtocol):
         self.repo = repo
 
-    def get_all_studios(self) -> list[Actor]:
+    def get_all_actors(self) -> list[Actor]:
         return self.repo.get_all_actors()
 
     def add_actor(self, actor:Actor) -> str:
@@ -16,7 +16,7 @@ class StudioService:
     def get_actor_by_name(self, query: str) -> list[Actor]:
         if not isinstance(query, str):
             raise TypeError("Expected str, got something else")
-        return self.repo.get_actor_by_name(query.strip().title())
+        return self.repo.get_actor_by_name(query)
 
     def remove_actor_by_id(self, actor_id:str):
         if not isinstance(actor_id, str):

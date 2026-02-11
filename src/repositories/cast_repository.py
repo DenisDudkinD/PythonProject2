@@ -8,7 +8,7 @@ class SQLCastRepository(CastRepositoryProtocol):
 
     def add_cast(self, cast:Cast) -> None:
         self.session.add(cast)
-
+        self.session.commit()
 
     def get_all_casts(self) -> list[Cast]:
         return self.session.query(Cast).all()
@@ -24,8 +24,9 @@ class SQLCastRepository(CastRepositoryProtocol):
         if cast is None:
             raise ValueError("Cast Not Found")
         self.session.delete(cast)
+        self.session.commit()
 
     def update_cast(self,cast:Cast) -> None:
         self.session.merge(cast)
-
+        self.session.commit()
 

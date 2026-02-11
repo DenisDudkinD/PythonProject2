@@ -7,7 +7,7 @@ class SQLActorRepository(ActorRepositoryProtocol):
         self.session = session
 
 
-    def add_actor(self, actor:Actor):
+    def add_actor(self, actor:Actor) -> None:
         self.session.add(actor)
         self.session.commit()
 
@@ -15,12 +15,12 @@ class SQLActorRepository(ActorRepositoryProtocol):
         return self.session.query(Actor).all()
     
     def get_actor_by_name(self,query:str):
-        return self.session.query(Actor).filter(Actor.full_name == query).all()
+        return self.session.query(Actor).filter(Actor.full_name == query).first()
 
-    def remove_actor(self,actor:Actor):
+    def remove_actor(self,actor:Actor)-> None:
         self.session.delete(actor)
         self.session.commit()
 
-    def update_actor(self,actor:Actor):
+    def update_actor(self,actor:Actor)-> None:
         self.session.merge(actor)
         self.session.commit()

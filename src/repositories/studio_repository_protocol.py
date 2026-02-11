@@ -2,13 +2,13 @@ from typing import Protocol
 from src.domain.studio import Studio
 
 class StudioRepositoryProtocol(Protocol):
-    def add_actor(self, studio:Studio):
+    def add_studio(self, studio:Studio):
         ...
-    def get_all_actors(self) -> list[Studio]:
+    def get_all_studios(self) -> list[Studio]:
         ...
-    def get_actor_by_name(self,query:str):
+    def get_studio_by_name(self,query:str):
         ...
-    def remove_actor_by_id(self,actor_id:str):
+    def remove_studio_by_id(self,studio_id:str):
         ...
-    def update_actor(self,actor_id:str,studio:Studio):
+    def update_studio(self,studio_id:str,studio:Studio):
         ...

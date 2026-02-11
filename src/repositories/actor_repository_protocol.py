@@ -1,5 +1,5 @@
 from typing import Protocol
-from src.domain.actor import Actor
+from src.domain.Actor import Actor
 
 class ActorRepositoryProtocol(Protocol):
     def add_actor(self, actor:Actor):
@@ -8,7 +8,7 @@ class ActorRepositoryProtocol(Protocol):
         ...
     def get_actor_by_name(self,query:str):
         ...
-    def remove_actor(self,actor:Actor):
+    def remove_actor_by_id(self,actor_id:str):
         ...
     def update_actor(self,actor:Actor):
         ...

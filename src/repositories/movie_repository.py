@@ -10,8 +10,7 @@ class MovieRepository(MovieRepositoryProtocol):
     def add_movie(self, movie: Movie):
         self.session.add(movie)
         self.session.commit()
-        self.session.refresh(movie)
-        return movie
+        return str(movie.movie_id)
     
     def get_all_movies(self) -> list[Movie]:
         return  self.session.query(Movie).all()

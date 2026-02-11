@@ -1,4 +1,4 @@
-from src.domain.Studio import Studio
+from src.domain.studio import Studio
 from src.repositories.studio_repository_protocol import StudioRepositoryProtocol
 
 

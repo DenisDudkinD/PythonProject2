@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from src.domain.movie import Movie
 from src.repositories.movie_repository_protocol import MovieRepositoryProtocol
@@ -16,18 +17,15 @@ class MovieRepository(MovieRepositoryProtocol):
         return  self.session.query(Movie).all()
     
     def find_movies_by_title(self, query: str) -> list[Movie]:
-        return self.session.query(Movie).filter(Movie.title == query).all()
+        return self.session.query(Movie).filter(func.lower(Movie.title) == query.lower()).all()
     
-    def remove_movie(self, movie: Movie):
+    def remove_movie(self, movie_id: str):
+        movie = self.session.get(Movie, movie_id)
         if movie is None:
-            return False
+            raise ValueError(f"Movie with id {movie_id} not found.")
         self.session.delete(movie)
         self.session.commit()
-        return True
 
-    def update_movie(self, movie: Movie):
-        if movie is None:
-            return False
+    def update_movie(self, movie: Movie) -> None:
         self.session.merge(movie)
         self.session.commit()
-        return True

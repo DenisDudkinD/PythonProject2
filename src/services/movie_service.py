@@ -20,12 +20,12 @@ class MovieService:
             raise ValueError("Query cannot be empty.")
         return self.repo.find_movies_by_title(query)
     
-    def remove_movie(self, movie: Movie) -> bool:
-        if not isinstance(movie, Movie):
-            raise TypeError("Expected Movie, got something else")
-        return self.repo.remove_movie(movie)
+    def remove_movie(self, movie_id: str) -> None:
+        if not isinstance(movie_id, str):
+            raise TypeError("Expected str, got something else")
+        return self.repo.remove_movie(movie_id)
     
-    def update_movie(self, movie: Movie) -> bool:
+    def update_movie(self, movie: Movie) -> None:
         if not isinstance(movie, Movie):
             raise TypeError("Expected Movie, got something else")
         return self.repo.update_movie(movie)

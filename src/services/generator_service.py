@@ -27,8 +27,17 @@ def generate(
         "France",
         "Spain",
         "Germany",
-        "Italy",
-    ]  # can change or add more later
+        "Italy"
+    ] # can change or add more later
+
+    ratings = [
+        "G",
+        "PG",
+        "PG-13",
+        "R",
+        "NC-17",
+        "NR"
+    ]
 
     movies = []
     studios = []
@@ -67,17 +76,13 @@ def generate(
         review_text = ["Very Bad", "Bad", "Good", "Very Good"][review_score // 3]
 
         movie = Movie(
-            movie_id=movie_id,
-            studio_id=studio_id,
-            title=f"Movie {i}",
-            release_date=date.today() - timedelta(days=int(rng.integers(1, 3600))),
-            runtime_minutes=int(rng.integers(80, 180)),
-            rating=None,
-            production_cost=int(rng.integers(10000, 10000000)),
-            revenue=int(rng.integers(0, 100000000)),
-            sequel_to_movie_id=(
-                movies[-1].movie_id if (movies and random.random() < 0.2) else None
-            ),
+            movie_id = movie_id,
+            studio_id = studio_id,
+            title = f"Movie {i}",
+            release_date = date.today() - timedelta(days = int(rng.integers(1, 3600))),
+            runtime_minutes = int(rng.integers(80, 180)),
+            rating = rng.choice(ratings),
+            sequel_to_movie_id = movies[-1].movie_id if (movies and random.random() < 0.2) else None
         )
 
         review = Review(

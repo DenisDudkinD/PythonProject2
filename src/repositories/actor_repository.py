@@ -7,9 +7,10 @@ class SQLActorRepository(ActorRepositoryProtocol):
         self.session = session
 
 
-    def add_actor(self, actor:Actor) -> None:
+    def add_actor(self, actor:Actor) -> str:
         self.session.add(actor)
         self.session.commit()
+        return str(actor.actor_id)
         
     def get_all_actors(self) -> list[Actor]:
         return self.session.query(Actor).all()

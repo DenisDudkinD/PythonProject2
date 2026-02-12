@@ -10,7 +10,7 @@ class CastService:
         return self.repo.get_all_casts()
 
     def add_cast(self, cast: Cast) -> None:
-        if not isinstance(cast, cast):
+        if not isinstance(cast, Cast):
             raise TypeError("Expected cast, got something else")
         self.repo.add_cast(cast)
 
@@ -24,7 +24,7 @@ class CastService:
         self.repo.remove_cast(movie_id, actor_id)
 
     def update_cast(self, cast: Cast):
-        if not isinstance(cast, cast):
+        if not isinstance(cast, Cast):
             raise TypeError("Expected cast, got something else")
         self.repo.update_cast(cast)
 

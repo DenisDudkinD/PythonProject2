@@ -7,6 +7,10 @@ from src.repositories.cast_repository import SQLCastRepository
 from src.repositories.movie_repository import MovieRepository
 from src.repositories.review_repository import ReviewRepository
 from src.repositories.studio_repository import StudioRepository
+from src.domain.actor import Actor
+from src.domain.cast import Cast
+from src.dto.actor import ActorRead, ActorCreate
+from src.dto.cast import CastRead, CastCreate
 from src.services.actor_service import ActorService
 from src.services.cast_service import CastService
 from src.services.generator_service import generate
@@ -63,3 +67,47 @@ def generate_seed_books(
     cast_svc.add_seed_records(casts)
     review_svc.add_seed_records(reviews)
     return "Records were added to DB......"
+
+#Actors endpoints
+@app.get("/actors", response_model=list[ActorRead])
+def list_actors(svc: ActorService = Depends(get_actor_service)):
+    return svc.get_all_actors()
+
+@app.post("/actors", response_model=str)
+def create_actor(payload: ActorCreate, 
+                svc: ActorService = Depends(get_actor_service)
+    ):
+    actor = Actor(**payload.model_dump())
+    actor_id = svc.add_actor(actor)
+    return actor_id
+
+@app.delete("/actors", response_model=str)
+def delete_actor( 
+    actor_id: str = Query(...),
+    svc:ActorService = Depends(get_actor_service)
+    ):
+    svc.remove_actor_by_id(actor_id)
+    return f"Actor {actor_id} deleted"
+
+
+#Casts endpoints
+@app.get("/casts", response_model=list[CastRead])
+def list_casts(svc: CastService = Depends(get_cast_service)):
+    return svc.get_all_casts()
+
+@app.post("/casts", response_model=str)
+def create_cast(payload: CastCreate, 
+                svc: CastService = Depends(get_cast_service)
+    ):
+    cast = Cast(**payload.model_dump())
+    svc.add_cast(cast)
+    return "cast_created"
+
+@app.delete("/casts", response_model=str)
+def delete_cast( 
+    movie_id: str = Query(...),
+    actor_id: str = Query(...),
+    svc:CastService = Depends(get_cast_service)
+    ):
+    svc.remove_cast(movie_id,actor_id)
+    return f"cast {movie_id} and {actor_id} deleted"

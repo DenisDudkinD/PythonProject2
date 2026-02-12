@@ -60,7 +60,7 @@ def generate(
         actor = Actor(
             actor_id=actor_id,
             full_name=f"First{i} Last{i}",
-            birth_date=datetime.now() - timedelta(days=int(rng.integers(7000, 30000))),
+            birth_date=date.today() - timedelta(days=int(rng.integers(7000, 30000))),
             nationality=rng.choice(countries),
         )
         actors.append(actor)

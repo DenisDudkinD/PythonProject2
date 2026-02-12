@@ -12,6 +12,8 @@ from src.domain.cast import Cast
 from src.domain.studio import Studio
 from src.dto.actor import ActorRead, ActorCreate
 from src.dto.cast import CastRead, CastCreate
+from src.dto.movie import MovieCreate, MovieRead, MovieUpdate
+from src.domain.movie import Movie
 from src.dto.studio import StudioRead, StudioCreate
 from src.services.actor_service import ActorService
 from src.services.cast_service import CastService
@@ -141,3 +143,48 @@ def delete_studio(
     ):
     svc.remove_studio_by_id(studio_id)
     return f"Studio deleted - id={studio_id}"
+
+# Movies endpoints
+@app.post("/movies", response_model=str)
+def create_movie(
+    payload: MovieCreate,
+    movie_svc: MovieService = Depends(get_movie_service),
+):
+    movie = Movie(**payload.model_dump())
+    movie_id = movie_svc.add_movie(movie)
+    return movie_id
+
+@app.get("/movies", response_model=list[MovieRead])
+def list_movies(movie_svc: MovieService = Depends(get_movie_service)):
+    movies = movie_svc.get_all_movies()
+    return movies
+
+@app.get("/movies/search", response_model=list[MovieRead])
+def search_movies(
+    title: str = Query(..., min_length=1),
+    movie_svc: MovieService = Depends(get_movie_service),
+):
+    movies =  movie_svc.find_movies_by_title(title)
+    return movies
+
+@app.delete("/movies/{movie_id}")
+def delete_movie(
+    movie_id: str,
+    movie_svc: MovieService = Depends(get_movie_service),
+):
+    movie_svc.remove_movie(movie_id)
+    return f"Movie deleted - id={movie_id}"
+
+@app.patch("/movies/{movie_id}", response_model=MovieRead)
+def update_movie(
+    movie_id: str,
+    payload: MovieUpdate,
+    db: Session = Depends(get_db),
+):
+    movie = db.get(Movie, movie_id)
+    data = payload.model_dump(exclude_unset=True)
+    for k, v in data.items():
+        setattr(movie, k, v)
+
+    db.commit()
+    return f"Movie updated - id={movie_id}"

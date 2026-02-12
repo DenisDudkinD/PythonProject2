@@ -30,3 +30,7 @@ class SQLCastRepository(CastRepositoryProtocol):
         self.session.merge(cast)
         self.session.commit()
 
+    def add_seed_records(self, casts: list[Cast])-> None:
+        for c in casts:
+            self.session.add(c)
+        self.session.commit()

@@ -27,3 +27,6 @@ class StudioService:
         if not isinstance(actor, actor):
             raise TypeError("Expected actor, got something else")
         self.repo.update_actor(actor)
+
+    def add_seed_records(self, actors: list[Actor]) -> None:
+        self.repo.add_seed_records(actors)

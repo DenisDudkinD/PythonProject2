@@ -9,8 +9,10 @@ from src.repositories.review_repository import ReviewRepository
 from src.repositories.studio_repository import StudioRepository
 from src.domain.actor import Actor
 from src.domain.cast import Cast
+from src.domain.studio import Studio
 from src.dto.actor import ActorRead, ActorCreate
 from src.dto.cast import CastRead, CastCreate
+from src.dto.studio import StudioRead, StudioCreate
 from src.services.actor_service import ActorService
 from src.services.cast_service import CastService
 from src.services.generator_service import generate
@@ -120,3 +122,22 @@ def delete_cast(
     svc.remove_cast(movie_id,actor_id)
     return f"cast {movie_id} and {actor_id} deleted"
 
+
+# Studios endpoints
+@app.get("/studios", response_model=list[StudioRead])
+def list_studios(svc: StudioService = Depends(get_studio_service)):
+    return svc.get_all_studios()
+
+@app.post("/studios", response_model=str)
+def add_studio(payload: StudioCreate, svc: StudioService = Depends(get_studio_service)):
+    studio = Studio(**payload.model_dump())
+    studio_id = svc.add_studio(studio)
+    return studio_id
+
+@app.delete("/studios", response_model=str)
+def delete_studio(
+    studio_id: str = Query(...),
+    svc: StudioService = Depends(get_studio_service)
+    ):
+    svc.remove_studio_by_id(studio_id)
+    return f"Studio deleted - id={studio_id}"

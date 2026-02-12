@@ -15,8 +15,11 @@ class SQLActorRepository(ActorRepositoryProtocol):
     def get_all_actors(self) -> list[Actor]:
         return self.session.query(Actor).all()
     
-    def get_actor_by_name(self,query:str):
-        return self.session.query(Actor).filter(Actor.full_name == query).first()
+    def get_actor_by_name(self,query:str) -> list[Actor]:
+        return self.session.query(Actor).filter(Actor.full_name == query).all()
+
+    def get_actor_by_id(self,actor_id:str)-> Actor:
+        return self.session.get(Actor,actor_id)
 
     def remove_actor_by_id(self,actor_id:str)-> None:
         actor = self.session.get(Actor,actor_id)

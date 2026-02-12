@@ -7,6 +7,9 @@ class ActorService:
 
     def get_all_actors(self) -> list[Actor]:
         return self.repo.get_all_actors()
+    
+    def get_actor_by_id(self, actor_id:str)->Actor:
+        return self.repo.get_actor_by_id(actor_id)
 
     def add_actor(self, actor:Actor) -> str:
         if not isinstance(actor, Actor):
@@ -24,7 +27,7 @@ class ActorService:
         self.repo.remove_actor_by_id(actor_id)
 
     def update_actor(self, actor:Actor):
-        if not isinstance(actor, actor):
+        if not isinstance(actor, Actor):
             raise TypeError("Expected actor, got something else")
         self.repo.update_actor(actor)
 

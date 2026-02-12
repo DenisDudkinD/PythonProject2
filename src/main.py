@@ -73,6 +73,13 @@ def generate_seed_books(
 def list_actors(svc: ActorService = Depends(get_actor_service)):
     return svc.get_all_actors()
 
+@app.put("/actors/{actor_id}", response_model=ActorRead)
+def get_actor(actor_id:str, payload: ActorCreate, svc: ActorService = Depends(get_actor_service)):
+    actor = Actor(**payload.model_dump())
+    actor.actor_id = actor_id
+    svc.update_actor(actor)
+    return actor
+
 @app.post("/actors", response_model=str)
 def create_actor(payload: ActorCreate, 
                 svc: ActorService = Depends(get_actor_service)
@@ -88,6 +95,7 @@ def delete_actor(
     ):
     svc.remove_actor_by_id(actor_id)
     return f"Actor {actor_id} deleted"
+
 
 
 #Casts endpoints
@@ -111,3 +119,4 @@ def delete_cast(
     ):
     svc.remove_cast(movie_id,actor_id)
     return f"cast {movie_id} and {actor_id} deleted"
+

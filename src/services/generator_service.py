@@ -27,6 +27,15 @@ def generate(movie_count=100, studio_count=10, actor_count=100, cast_count=200, 
         "Italy"
     ] # can change or add more later
 
+    ratings = [
+        "G",
+        "PG",
+        "PG-13",
+        "R",
+        "NC-17",
+        "NR"
+    ]
+
     movies = []
     studios = []
     actors = []
@@ -69,7 +78,7 @@ def generate(movie_count=100, studio_count=10, actor_count=100, cast_count=200, 
             title = f"Movie {i}",
             release_date = date.today() - timedelta(days = int(rng.integers(1, 3600))),
             runtime_minutes = int(rng.integers(80, 180)),
-            rating = None,
+            rating = rng.choice(ratings),
             sequel_to_movie_id = movies[-1].movie_id if (movies and random.random() < 0.2) else None
         )
 

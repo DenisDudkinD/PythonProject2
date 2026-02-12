@@ -12,6 +12,7 @@ from src.services.cast_service import CastService
 from src.services.generator_service import generate
 from src.services.movie_service import MovieService
 from src.services.studio_service import StudioService
+from src.services.review_service import ReviewService
 from src.db.deps import get_db
 
 app = FastAPI(title="Book API")
@@ -43,8 +44,8 @@ def get_studio_service(repo: StudioRepository = Depends(get_studio_repository)) 
 def get_review_repository(db: Session = Depends(get_db)) -> ReviewRepository:
     return ReviewRepository(db)
 
-#def get_review_service(repo: ReviewRepository = Depends(get_review_repository)) -> ReviewService:
-#    return ReviewService(repo)
+def get_review_service(repo: ReviewRepository = Depends(get_review_repository)) -> ReviewService:
+    return ReviewService(repo)
 
 
 @app.post("/generate")
@@ -53,11 +54,12 @@ def generate_seed_books(
     cast_svc: CastService = Depends(get_cast_service),
     studio_svc: StudioService = Depends(get_studio_service),
     movie_svc: MovieService = Depends(get_movie_service),
-#    review_svc: ReviewService = Depends(get_review_service),
+    review_svc: ReviewService = Depends(get_review_service),
 ):
     movies, studios, actors, casts, reviews = generate()
-#    movie_svc.add_seed_records(movies)
-#    studio_svc.add_seed_records(studios)
+    studio_svc.add_seed_records(studios)
+    movie_svc.add_seed_records(movies)
     actor_svc.add_seed_records(actors)
     cast_svc.add_seed_records(casts)
+    review_svc.add_seed_records(reviews)
     return "Books were added to DB......"

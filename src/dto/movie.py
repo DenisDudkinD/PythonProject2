@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class MovieCreate(BaseModel):
     studio_id: UUID
     title: str
-    released_date: Optional[date] = None
+    release_date: Optional[date] = None
     runtime_minutes: Optional[int] = None
     rating: Optional[str] = None
     sequel_to_movie_id: Optional[UUID] = None

@@ -29,3 +29,8 @@ class MovieRepository(MovieRepositoryProtocol):
     def update_movie(self, movie: Movie) -> None:
         self.session.merge(movie)
         self.session.commit()
+
+    def add_seed_records(self, movies: list[Movie]) -> None:
+        for m in movies:
+            self.session.add(m)
+        self.session.commit()

@@ -11,8 +11,9 @@ class MovieCreate(BaseModel):
     runtime_minutes: Optional[int] = None
     rating: Optional[str] = None
     sequel_to_movie_id: Optional[UUID] = None
-
-
+    production_cost: Optional[int] = None
+    revenue: Optional[int] = None
+    
 class MovieRead(MovieCreate):
     movie_id: UUID
 

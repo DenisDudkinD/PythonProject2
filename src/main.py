@@ -62,4 +62,4 @@ def generate_seed_books(
     actor_svc.add_seed_records(actors)
     cast_svc.add_seed_records(casts)
     review_svc.add_seed_records(reviews)
-    return "Books were added to DB......"
+    return "Records were added to DB......"

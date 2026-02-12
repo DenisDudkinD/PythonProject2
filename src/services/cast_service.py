@@ -26,3 +26,6 @@ class StudioService:
         if not isinstance(cast, cast):
             raise TypeError("Expected cast, got something else")
         self.repo.update_cast(cast)
+    
+    def add_seed_records(self, casts: list[Cast]) -> None:
+        self.repo.add_seed_records(casts)

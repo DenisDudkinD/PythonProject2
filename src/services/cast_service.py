@@ -1,7 +1,7 @@
 from src.domain.cast import Cast
 from src.repositories.actor_repository import ActorRepositoryProtocol
 
-class StudioService:
+class CastService:
     def __init__(self, repo: ActorRepositoryProtocol):
         self.repo = repo
 

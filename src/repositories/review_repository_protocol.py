@@ -1,5 +1,5 @@
 from typing import Protocol
-from src.domain.Review import Review
+from src.domain.review import Review
 
 
 class ReviewRepositoryProtocol(Protocol):

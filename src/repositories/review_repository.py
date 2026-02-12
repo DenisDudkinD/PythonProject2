@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src.domain.Review import Review
+from src.domain.review import Review
 from src.repositories.review_repository_protocol import ReviewRepositoryProtocol
 
 

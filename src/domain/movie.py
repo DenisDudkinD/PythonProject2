@@ -12,7 +12,7 @@ class Movie(Base):
     studio_id = Column(UUID(as_uuid=True),ForeignKey("studios.studio_id"), nullable=False)
 
     title = Column(String(200), nullable=False)
-    released_date = Column(Date, default=date.today)
+    release_date = Column(Date, default=date.today)
     runtime_minutes = Column(Integer, nullable=True)
     rating = Column(String(10), nullable=True)
 

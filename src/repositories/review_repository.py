@@ -18,10 +18,15 @@ class ReviewRepository(ReviewRepositoryProtocol):
     def get_reviews_by_movie(self, movie_id: str) -> list[Review]:
         return self.session.query(Review).filter(Review.movie_id == movie_id).all()
     
-    def update_review(self, review: Review):
+    def update_review(self, review: Review) -> None:
         self.session.merge(review)
         self.session.commit()
 
-    def delete_review(self, review: Review):
+    def delete_review(self, review: Review) -> None:
         self.session.delete(review)
+        self.session.commit()
+    
+    def add_seed_records(self, reviews: list[Review]) -> None:
+        for review in reviews:
+            self.session.add(review)
         self.session.commit()

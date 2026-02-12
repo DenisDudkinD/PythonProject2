@@ -28,7 +28,7 @@ class SQLActorRepository(ActorRepositoryProtocol):
         self.session.merge(actor)
         self.session.commit()
 
-    def add_seed_records(self, actors: list[Actor])-> None:
+    def add_seed_records(self, actors: list[Actor]) -> None:
         for a in actors:
             self.session.add(a)
         self.session.commit()

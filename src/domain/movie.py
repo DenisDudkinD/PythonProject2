@@ -1,11 +1,15 @@
 import uuid
 from datetime import date
-from sqlalchemy import Column, String, Date, ForeignKey, Integer
+from sqlalchemy import CheckConstraint, Column, String, Date, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from src.base import Base
 
 class Movie(Base):
     __tablename__ = "movies"
+
+    __table_args__ = (
+        CheckConstraint("production_cost >= 0", name="check_production_cost_positive"),
+    )
 
     movie_id= Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 

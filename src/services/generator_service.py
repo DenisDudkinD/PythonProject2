@@ -82,6 +82,8 @@ def generate(
             release_date = date.today() - timedelta(days = int(rng.integers(1, 3600))),
             runtime_minutes = int(rng.integers(80, 180)),
             rating = rng.choice(ratings),
+            production_cost=int(rng.integers(10000, 10000000)),
+            revenue=int(rng.integers(0, 100000000)),
             sequel_to_movie_id = movies[-1].movie_id if (movies and random.random() < 0.2) else None
         )
 

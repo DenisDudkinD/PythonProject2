@@ -10,9 +10,11 @@ from src.repositories.studio_repository import StudioRepository
 from src.domain.actor import Actor
 from src.domain.cast import Cast
 from src.domain.studio import Studio
+from src.domain.review import Review
 from src.dto.actor import ActorRead, ActorCreate
 from src.dto.cast import CastRead, CastCreate
 from src.dto.movie import MovieCreate, MovieRead, MovieUpdate
+from src.dto.review import ReviewCreate, ReviewRead
 from src.domain.movie import Movie
 from src.dto.studio import StudioRead, StudioCreate
 from src.services.actor_service import ActorService
@@ -188,3 +190,45 @@ def update_movie(
 
     db.commit()
     return f"Movie updated - id={movie_id}"
+
+# Review endpoints
+@app.post("/reviews", response_model=str)
+def create_review(
+    payload: ReviewCreate,
+    review_svc: ReviewService = Depends(get_review_service)
+):
+    review = Review(**payload.model_dump())
+    review_svc.add_review(review)
+    return review.review_id
+
+@app.get("/reviews", response_model=list[ReviewRead])
+def all_reviews(review_svc: ReviewService = Depends(get_review_service)):
+    reviews = review_svc.get_all_reviews()
+    return reviews
+
+@app.get("/movies/{movie_id}/reviews", response_model=list[ReviewRead])
+def reviews_by_movie(
+    movie_id: str,
+    review_svc: ReviewService = Depends(get_review_service)
+):
+    reviews = review_svc.get_reviews_by_movie(movie_id)
+    return reviews
+
+@app.delete("/reviews/{review_id}")
+def delete_review(
+    review_id: str,
+    review_svc: ReviewService = Depends(get_review_service)
+):
+    review_svc.delete_review(review_id)
+    return f"Successfully deleted review with ID '{review_id}'"
+
+@app.patch("/reviews/{review_id}", response_model=ReviewRead)
+def update_review(
+    review_id: str,
+    payload: ActorCreate,
+    review_svc: ReviewService = Depends(get_review_service)
+):
+    review = Review(**payload.model_dump())
+    review.review_id = review_id
+    review_svc.update_review(review)
+    return review

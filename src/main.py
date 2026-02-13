@@ -1,5 +1,7 @@
 from uuid import UUID
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
+import sqlalchemy
 from sqlalchemy.orm import Session
 
 from src.repositories.actor_repository import SQLActorRepository
@@ -55,6 +57,20 @@ def get_review_repository(db: Session = Depends(get_db)) -> ReviewRepository:
 def get_review_service(repo: ReviewRepository = Depends(get_review_repository)) -> ReviewService:
     return ReviewService(repo)
 
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request:Request,exc:HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail":exc.detail}
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request:Request, exc: Exception):
+    return JSONResponse(
+        status_code = 500,
+        content={"detail":"Internal Server Error"}
+    )
+
 
 @app.post("/generate")
 def generate_seed_books(
@@ -92,13 +108,17 @@ def create_actor(payload: ActorCreate,
     actor_id = svc.add_actor(actor)
     return actor_id
 
-@app.delete("/actors", response_model=str)
+@app.delete("/actors/{actor_id}", response_model=str)
 def delete_actor( 
-    actor_id: str = Query(...),
+    actor_id: str,
     svc:ActorService = Depends(get_actor_service)
     ):
-    svc.remove_actor_by_id(actor_id)
-    return f"Actor {actor_id} deleted"
+    try:
+        svc.remove_actor_by_id(actor_id)
+        return f"Actor {actor_id} deleted"
+    except sqlalchemy.exc.IntegrityError as e:
+        raise HTTPException(status_code=400,detail="Can not delete, actor is foreign key in another table.")
+    
 
 
 

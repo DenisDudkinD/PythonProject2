@@ -82,7 +82,7 @@ def list_actors(svc: ActorService = Depends(get_actor_service)):
 @app.put("/actors/{actor_id}", response_model=ActorRead)
 def get_actor(actor_id:str, payload: ActorCreate, svc: ActorService = Depends(get_actor_service)):
     actor = Actor(**payload.model_dump())
-    actor.actor_id = actor_id
+    actor.actor_id = actor_id # type: ignore
     svc.update_actor(actor)
     return actor
 
@@ -146,6 +146,13 @@ def delete_studio(
     svc.remove_studio_by_id(studio_id)
     return f"Studio deleted - id={studio_id}"
 
+@app.put("/studios/{studio_id}", response_model=StudioRead)
+def update_studio(studio_id:str, payload: StudioCreate, svc: StudioService = Depends(get_studio_service)):
+    studio = Studio(**payload.model_dump())
+    studio.studio_id = studio_id # type: ignore
+    svc.update_studio(studio_id, studio)
+    return studio
+
 # Movies endpoints
 @app.post("/movies", response_model=str)
 def create_movie(
@@ -177,7 +184,7 @@ def delete_movie(
     movie_svc.remove_movie(movie_id)
     return f"Movie deleted - id={movie_id}"
 
-@app.patch("/movies/{movie_id}", response_model=MovieRead)
+@app.patch("/movies/{movie_id}")
 def update_movie(
     movie_id: str,
     payload: MovieUpdate,

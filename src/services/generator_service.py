@@ -1,6 +1,6 @@
 import random
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 import numpy as np
 
 from src.domain.movie import Movie
@@ -115,7 +115,7 @@ def generate(
             actor_id = actor_id,
             role_type = rng.choice(["Leading", "Supporting"]),
             character_name= f"Character{i}",
-            billing_order = int(rng.integers(10, 50)),
+            billing_order = int(rng.integers(1, 50)),
         )
         casts.append(cast)
         i += 1

@@ -18,6 +18,8 @@ class CastService:
         return self.repo.get_specific_cast(movie_id, actor_id)
 
     def get_cast_by_movie(self, movie_id: str):
+        if not isinstance(movie_id, str):
+            raise TypeError("Expected str, got something else.")
         return self.repo.get_cast_by_movie(movie_id)
 
     def remove_cast(self, movie_id: str, actor_id: str):

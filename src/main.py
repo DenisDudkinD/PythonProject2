@@ -15,7 +15,7 @@ from src.domain.cast import Cast
 from src.domain.studio import Studio
 from src.domain.review import Review
 from src.dto.actor import ActorRead, ActorCreate
-from src.dto.cast import CastRead, CastCreate
+from src.dto.cast import CastRead, CastCreate, MovieCastRead
 from src.dto.movie import MovieCreate, MovieRead, MovieUpdate
 from src.dto.review import ReviewCreate, ReviewRead
 from src.domain.movie import Movie
@@ -198,10 +198,6 @@ def search_movies(
     movie_svc: MovieService = Depends(get_movie_service),
 ):
     movies =  movie_svc.find_movies_by_title(title)
-
-    if not movies:
-        raise HTTPException(status_code=404, detail="No movie found")
-
     return movies
 
 @app.delete("/movies/{movie_id}")
@@ -236,6 +232,30 @@ def update_movie(
 
     db.commit()
     return f"Movie updated - id={movie_id}"
+
+@app.get("/movies/{movie_id}/cast")
+def get_movie_cast(
+    movie_id: str,
+    movie_svc: MovieService = Depends(get_movie_service),
+    cast_svc: CastService = Depends(get_cast_service),
+):
+    movie = movie_svc.get_movie_by_id(movie_id)
+    if movie is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    
+    rows = cast_svc.get_cast_by_movie(movie_id)
+
+    return [
+        MovieCastRead(
+            movie_id=c.movie_id,
+            actor_id=a.actor_id,
+            actor_name=a.full_name,
+            role_type=c.role_type,
+            character_name=c.character_name,
+            billing_order=c.billing_order,
+        )
+        for c, a in rows
+    ]
 
 # Review endpoints
 @app.post("/reviews", response_model=str)

@@ -175,7 +175,7 @@ def delete_movie(
     movie_svc.remove_movie(movie_id)
     return f"Movie deleted - id={movie_id}"
 
-@app.patch("/movies/{movie_id}", response_model=MovieRead)
+@app.patch("/movies/{movie_id}")
 def update_movie(
     movie_id: str,
     payload: MovieUpdate,

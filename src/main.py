@@ -3,6 +3,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 import sqlalchemy
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from src.repositories.actor_repository import SQLActorRepository
 from src.repositories.cast_repository import SQLCastRepository
@@ -118,8 +119,8 @@ def delete_actor(
     try:
         svc.remove_actor_by_id(actor_id)
         return f"Actor {actor_id} deleted"
-    except sqlalchemy.exc.IntegrityError as e:
-        raise HTTPException(status_code=400,detail="Can not delete, actor is foreign key in another table.")
+    except IntegrityError as e:
+        raise HTTPException(status_code=400,detail="Can not delete, actor is foreign key in another table.") from e
     
 
 
@@ -179,9 +180,12 @@ def create_movie(
     payload: MovieCreate,
     movie_svc: MovieService = Depends(get_movie_service),
 ):
-    movie = Movie(**payload.model_dump())
-    movie_id = movie_svc.add_movie(movie)
-    return movie_id
+    try:
+        movie = Movie(**payload.model_dump())
+        movie_id = movie_svc.add_movie(movie)
+        return movie_id
+    except IntegrityError as e:
+        raise HTTPException(status_code=409, detail="Database constraint violation while creating movie") from e
 
 @app.get("/movies", response_model=list[MovieRead])
 def list_movies(movie_svc: MovieService = Depends(get_movie_service)):
@@ -194,6 +198,10 @@ def search_movies(
     movie_svc: MovieService = Depends(get_movie_service),
 ):
     movies =  movie_svc.find_movies_by_title(title)
+
+    if not movies:
+        raise HTTPException(status_code=404, detail="No movie found")
+
     return movies
 
 @app.delete("/movies/{movie_id}")
@@ -201,8 +209,11 @@ def delete_movie(
     movie_id: str,
     movie_svc: MovieService = Depends(get_movie_service),
 ):
-    movie_svc.remove_movie(movie_id)
-    return f"Movie deleted - id={movie_id}"
+    try:
+        movie_svc.remove_movie(movie_id)
+        return f"Movie deleted - id={movie_id}"
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail="Movie not found") from e
 
 @app.patch("/movies/{movie_id}")
 def update_movie(
@@ -211,7 +222,15 @@ def update_movie(
     db: Session = Depends(get_db),
 ):
     movie = db.get(Movie, movie_id)
+
+    if movie is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    
     data = payload.model_dump(exclude_unset=True)
+
+    if not data:
+        raise HTTPException(status_code=400, detail="No fields provide to update")
+
     for k, v in data.items():
         setattr(movie, k, v)
 

@@ -26,6 +26,7 @@ from src.services.generator_service import generate
 from src.services.movie_service import MovieService
 from src.services.studio_service import StudioService
 from src.services.review_service import ReviewService
+from src.services.movie_analytics_service import MovieAnalyticsService
 from src.db.deps import get_db
 
 app = FastAPI(title="Book API")
@@ -59,6 +60,9 @@ def get_review_repository(db: Session = Depends(get_db)) -> ReviewRepository:
 
 def get_review_service(repo: ReviewRepository = Depends(get_review_repository)) -> ReviewService:
     return ReviewService(repo)
+
+def get_movie_analytics_service() -> MovieAnalyticsService:
+    return MovieAnalyticsService()
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request:Request,exc:HTTPException):
@@ -164,8 +168,11 @@ def delete_studio(
     studio_id: str = Query(...),
     svc: StudioService = Depends(get_studio_service)
     ):
-    svc.remove_studio_by_id(studio_id)
-    return f"Studio deleted - id={studio_id}"
+    try: 
+        svc.remove_studio_by_id(studio_id)
+        return f"Studio deleted - id={studio_id}"
+    except IntegrityError as e:
+        raise HTTPException(status_code=400,detail="Can not delete, studio is foreign key in another table.") from e
 
 @app.put("/studios/{studio_id}", response_model=StudioRead)
 def update_studio(studio_id:str, payload: StudioCreate, svc: StudioService = Depends(get_studio_service)):
@@ -295,6 +302,69 @@ def update_review(
     review_svc: ReviewService = Depends(get_review_service)
 ):
     review = Review(**payload.model_dump())
-    review.review_id = review_id
+    review.review_id = review_id # type: ignore
     review_svc.update_review(review)
     return review
+
+# Analytics Endpoints
+@app.get("/analytics/average_score")
+def average_review_score(
+    analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
+    review_svc: ReviewService = Depends(get_review_service),
+):
+    reviews = review_svc.get_all_reviews()
+    if not reviews:
+        return {"average_score": None}
+    return {"average_score": analytics.average_review_score(reviews)}
+
+@app.get("/analytics/average_revenue")
+def average_revenue(
+    analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
+    movie_svc: MovieService = Depends(get_movie_service),
+):
+    movies = movie_svc.get_all_movies()
+    if not movies:
+        return {"average_revenue": None}
+    return {"average_revenue": analytics.average_revenue(movies)}
+
+@app.get("/analytics/average_revenue_by_rating")
+def average_revenue_by_rating(
+    analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
+    movie_svc: MovieService = Depends(get_movie_service),
+):
+    movies = movie_svc.get_all_movies()
+    if not movies:
+        return {"average_revenue_by_rating": None}
+    return analytics.average_revenue_by_rating(movies)
+
+@app.get("/analytics/cast_sizes")
+def cast_sizes(
+    analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
+    movie_svc: MovieService = Depends(get_movie_service),
+    cast_svc: CastService = Depends(get_cast_service),
+):
+    movies = movie_svc.get_all_movies()
+    casts = cast_svc.get_all_casts()
+    return analytics.cast_size_by_movie(movies, casts)
+
+@app.get("/analytics/actors_by_number_of_roles")
+def actors_by_number_of_roles(
+    analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
+    actor_svc: ActorService = Depends(get_actor_service),
+    cast_svc: CastService = Depends(get_cast_service),
+):
+    actors = actor_svc.get_all_actors()
+    casts = cast_svc.get_all_casts()
+    return analytics.actors_by_number_of_roles(actors, casts)
+
+@app.get("/analytics/studios_average_scores")
+def studios_average_scores(
+    analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
+    studio_svc: StudioService = Depends(get_studio_service),
+    movie_svc: MovieService = Depends(get_movie_service),
+    review_svc: ReviewService = Depends(get_review_service),
+):
+    studios = studio_svc.get_all_studios()
+    movies = movie_svc.get_all_movies()
+    reviews = review_svc.get_all_reviews()
+    return analytics.studios_by_average_review_score(studios, movies, reviews)

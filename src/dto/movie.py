@@ -7,12 +7,13 @@ from pydantic import BaseModel
 class MovieCreate(BaseModel):
     studio_id: UUID
     title: str
-    released_date: Optional[date] = None
+    release_date: Optional[date] = None
     runtime_minutes: Optional[int] = None
     rating: Optional[str] = None
     sequel_to_movie_id: Optional[UUID] = None
-
-
+    production_cost: Optional[int] = None
+    revenue: Optional[int] = None
+    
 class MovieRead(MovieCreate):
     movie_id: UUID
 
@@ -23,3 +24,13 @@ class MovieRead(MovieCreate):
             "title": ...,
             "studio_id": ...,
         }
+
+class MovieUpdate(BaseModel):
+    studio_id: Optional[UUID] = None
+    title: Optional[str] = None
+    release_date: Optional[date] = None
+    runtime_minutes: Optional[int] = None
+    rating: Optional[str] = None
+    sequel_to_movie_id: Optional[UUID] = None
+    production_cost: Optional[int] = None
+    revenue: Optional[int] = None

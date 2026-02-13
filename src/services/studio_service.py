@@ -30,3 +30,6 @@ class StudioService:
         if not isinstance(studio, Studio):
             raise TypeError("Expected Studio, got something else")
         self.repo.update_studio(studio_id, studio)
+    
+    def add_seed_records(self, studios: list[Studio]) -> None:
+        self.repo.add_seed_records(studios)

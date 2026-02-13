@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from src.domain.cast import Cast
+from src.domain.actor import Actor
 from src.repositories.cast_repository_protocol import CastRepositoryProtocol
 
 class SQLCastRepository(CastRepositoryProtocol):
@@ -16,8 +17,15 @@ class SQLCastRepository(CastRepositoryProtocol):
     def get_specific_cast(self,movie_id:str,actor_id:str)->Cast:
         return self.session.get(Cast,(movie_id, actor_id))
 
-    def get_cast_by_movie(self,movie_id:str)-> list[Cast]:
-        return self.session.query(Cast).filter(Cast.movie_id == movie_id).all()
+    def get_cast_by_movie(self,movie_id:str) -> list[tuple[Cast, Actor]]:
+        rows = (
+            self.session.query(Cast, Actor)
+            .join(Actor, Cast.actor_id == Actor.actor_id)
+            .filter(Cast.movie_id == movie_id)
+            .order_by(Cast.billing_order.asc())
+            .all()
+        )
+        return rows
     
     def remove_cast(self,movie_id:str,actor_id:str) -> None:
         cast = self.session.get(Cast,(movie_id, actor_id))
@@ -30,3 +38,7 @@ class SQLCastRepository(CastRepositoryProtocol):
         self.session.merge(cast)
         self.session.commit()
 
+    def add_seed_records(self, casts: list[Cast]) -> None:
+        for c in casts:
+            self.session.add(c)
+        self.session.commit()

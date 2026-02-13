@@ -1,12 +1,15 @@
 from src.domain.actor import Actor
 from src.repositories.actor_repository import ActorRepositoryProtocol
 
-class StudioService:
+class ActorService:
     def __init__(self, repo: ActorRepositoryProtocol):
         self.repo = repo
 
     def get_all_actors(self) -> list[Actor]:
         return self.repo.get_all_actors()
+    
+    def get_actor_by_id(self, actor_id:str)->Actor:
+        return self.repo.get_actor_by_id(actor_id)
 
     def add_actor(self, actor:Actor) -> str:
         if not isinstance(actor, Actor):
@@ -24,6 +27,9 @@ class StudioService:
         self.repo.remove_actor_by_id(actor_id)
 
     def update_actor(self, actor:Actor):
-        if not isinstance(actor, actor):
+        if not isinstance(actor, Actor):
             raise TypeError("Expected actor, got something else")
         self.repo.update_actor(actor)
+
+    def add_seed_records(self, actors: list[Actor]) -> None:
+        self.repo.add_seed_records(actors)

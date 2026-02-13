@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src.domain.Review import Review
+from src.domain.review import Review
 from src.repositories.review_repository_protocol import ReviewRepositoryProtocol
 
 
@@ -22,7 +22,10 @@ class ReviewRepository(ReviewRepositoryProtocol):
         self.session.merge(review)
         self.session.commit()
 
-    def delete_review(self, review: Review) -> None:
+    def delete_review(self, review_id: str) -> None:
+        review = self.session.get(Review, review_id)
+        if review is None:
+            raise ValueError(f"Review with id '{review_id}' not found.")
         self.session.delete(review)
         self.session.commit()
     

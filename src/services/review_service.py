@@ -26,10 +26,10 @@ class ReviewService:
             raise TypeError("Expected Review, got something else.")
         self.repo.update_review(review)
 
-    def delete_review(self, review: Review) -> None:
-        if not isinstance(review, Review):
-            raise TypeError("Expected Review, got something else.")
-        self.repo.delete_review(review)
+    def delete_review(self, review_id: str) -> None:
+        if not isinstance(review_id, str):
+            raise TypeError("Expected String, got something else.")
+        self.repo.delete_review(review_id)
     
     def add_seed_records(self, reviews: list[Review]) -> None:
         self.repo.add_seed_records(reviews)

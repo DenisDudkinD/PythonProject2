@@ -1,5 +1,5 @@
 from typing import Protocol
-from src.domain.Review import Review
+from src.domain.review import Review
 
 
 class ReviewRepositoryProtocol(Protocol):
@@ -15,7 +15,7 @@ class ReviewRepositoryProtocol(Protocol):
     def update_review(self, review: Review) -> None:
         ...
 
-    def delete_review(self, review: Review) -> None:
+    def delete_review(self, review_id: str) -> None:
         ...
     
     def add_seed_records(self, reviews: list[Review]) -> None:

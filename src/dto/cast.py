@@ -17,3 +17,11 @@ class CastRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class MovieCastRead(BaseModel):
+    movie_id: UUID
+    actor_id: UUID
+    actor_name: str
+    role_type: str
+    character_name: str
+    billing_order: int

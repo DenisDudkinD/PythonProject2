@@ -7,15 +7,19 @@ class SQLActorRepository(ActorRepositoryProtocol):
         self.session = session
 
 
-    def add_actor(self, actor:Actor) -> None:
+    def add_actor(self, actor:Actor) -> str:
         self.session.add(actor)
         self.session.commit()
+        return str(actor.actor_id)
         
     def get_all_actors(self) -> list[Actor]:
         return self.session.query(Actor).all()
     
-    def get_actor_by_name(self,query:str):
-        return self.session.query(Actor).filter(Actor.full_name == query).first()
+    def get_actor_by_name(self,query:str) -> list[Actor]:
+        return self.session.query(Actor).filter(Actor.full_name == query).all()
+
+    def get_actor_by_id(self,actor_id:str)-> Actor:
+        return self.session.get(Actor,actor_id)
 
     def remove_actor_by_id(self,actor_id:str)-> None:
         actor = self.session.get(Actor,actor_id)
@@ -28,4 +32,7 @@ class SQLActorRepository(ActorRepositoryProtocol):
         self.session.merge(actor)
         self.session.commit()
 
-
+    def add_seed_records(self, actors: list[Actor]) -> None:
+        for a in actors:
+            self.session.add(a)
+        self.session.commit()

@@ -29,3 +29,11 @@ class MovieService:
         if not isinstance(movie, Movie):
             raise TypeError("Expected Movie, got something else")
         return self.repo.update_movie(movie)
+    
+    def get_movie_by_id(self, movie_id: str) -> Movie | None:
+        if not isinstance(movie_id, str):
+            raise TypeError("Expected str, got something else")
+        return self.repo.get_movie_by_id(movie_id)
+    
+    def add_seed_records(self, movies: list[Movie]) -> None:
+        self.repo.add_seed_records(movies)

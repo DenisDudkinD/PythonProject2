@@ -1,5 +1,6 @@
 from typing import Protocol
 from src.domain.cast import Cast
+from src.domain.actor import Actor
 
 class CastRepositoryProtocol(Protocol):
     def add_cast(self, cast:Cast):
@@ -8,9 +9,11 @@ class CastRepositoryProtocol(Protocol):
         ...
     def get_specific_cast(self,movie_id:str,actor_id:str)->Cast:
         ...
-    def get_cast_by_movie(self,movie_id:str):
+    def get_cast_by_movie(self,movie_id:str) -> list[tuple[Cast, Actor]]:
         ...
     def remove_cast(self,movie_id:str,actor_id:str):
         ...
     def update_cast(self,cast:Cast):
+        ...
+    def add_seed_records(self, casts: list[Cast]) -> None:
         ...

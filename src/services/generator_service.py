@@ -1,6 +1,6 @@
 import random
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 import numpy as np
 
 from src.domain.movie import Movie

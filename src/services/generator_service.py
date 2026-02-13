@@ -98,16 +98,26 @@ def generate(
         movies.append(movie)
         reviews.append(review)
 
-    for i in range(cast_count):
+    used_pairs: set[tuple[str, str]] = set()
+    i = 0
+    while len(casts) < cast_count:
         movie_id = rng.choice(movies).movie_id
         actor_id = rng.choice(actors).actor_id
+
+        pair = (str(movie_id), str(actor_id))
+        if pair in used_pairs:
+            continue
+
+        used_pairs.add(pair)
+
         cast = Cast(
-            movie_id=movie_id,
-            actor_id=actor_id,
-            role_type=rng.choice(["Leading", "Supporting"]),
-            character_name=f"Character{i}",
-            billing_order=int(rng.integers(10, 50)),
+            movie_id = movie_id,
+            actor_id = actor_id,
+            role_type = rng.choice(["Leading", "Supporting"]),
+            character_name= f"Character{i}",
+            billing_order = int(rng.integers(10, 50)),
         )
         casts.append(cast)
+        i += 1
 
     return movies, studios, actors, casts, reviews

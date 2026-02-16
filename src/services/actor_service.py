@@ -1,4 +1,5 @@
 from src.domain.actor import Actor
+from src.domain.exceptions import NotFoundException
 from src.repositories.actor_repository import ActorRepositoryProtocol
 
 class ActorService:
@@ -9,7 +10,13 @@ class ActorService:
         return self.repo.get_all_actors()
     
     def get_actor_by_id(self, actor_id:str)->Actor:
-        return self.repo.get_actor_by_id(actor_id)
+        try:
+            actor = self.repo.get_actor_by_id(actor_id)
+            if actor is None:
+                raise NotFoundException(f"Actor not Found. ID: {actor_id}")
+            return actor
+        except Exception:
+            raise
 
     def add_actor(self, actor:Actor) -> str:
         if not isinstance(actor, Actor):

@@ -3,8 +3,9 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 import sqlalchemy
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, DataError
 
+from src.domain.exceptions import NotFoundException
 from src.repositories.actor_repository import SQLActorRepository
 from src.repositories.cast_repository import SQLCastRepository
 from src.repositories.movie_repository import MovieRepository
@@ -101,11 +102,23 @@ def list_actors(svc: ActorService = Depends(get_actor_service)):
     return svc.get_all_actors()
 
 @app.put("/actors/{actor_id}", response_model=ActorRead)
-def get_actor(actor_id:str, payload: ActorCreate, svc: ActorService = Depends(get_actor_service)):
-    actor = Actor(**payload.model_dump())
-    actor.actor_id = actor_id # type: ignore
-    svc.update_actor(actor)
-    return actor
+def put_actor(actor_id:str, payload: ActorCreate, svc: ActorService = Depends(get_actor_service)):
+    try:
+        actor = Actor(**payload.model_dump())
+        actor.actor_id = actor_id
+        svc.update_actor(actor)
+        return actor
+    except Exception:
+        raise HTTPException(status_code=500,detail='Internal Server error')
+
+@app.get("/actors/{actor_id}", response_model=ActorRead)
+def get_actor(actor_id:str, svc: ActorService = Depends(get_actor_service)):
+    try:
+        return svc.get_actor_by_id(actor_id)
+    except NotFoundException:
+        raise HTTPException(status_code=500,detail='Actor Not Found')
+    except DataError:
+        raise HTTPException(status_code=400,detail='Invalid ID Provided')
 
 @app.post("/actors", response_model=str)
 def create_actor(payload: ActorCreate, 
@@ -148,9 +161,11 @@ def delete_cast(
     actor_id: str = Query(...),
     svc:CastService = Depends(get_cast_service)
     ):
-    svc.remove_cast(movie_id,actor_id)
-    return f"cast {movie_id} and {actor_id} deleted"
-
+    try:
+        svc.remove_cast(movie_id,actor_id)
+        return f"cast {movie_id} and {actor_id} deleted"
+    except IntegrityError as e:
+        raise HTTPException(status_code=400,detail="Can not delete, cast is foreign key in another table.") from e
 
 # Studios endpoints
 @app.get("/studios", response_model=list[StudioRead])

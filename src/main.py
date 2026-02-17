@@ -118,7 +118,7 @@ def get_actor(actor_id:str, svc: ActorService = Depends(get_actor_service)):
     except NotFoundException:
         raise HTTPException(status_code=500,detail='Actor Not Found')
     except DataError:
-        raise HTTPException(status_code=400,detail='Invalid ID Provided')
+        raise HTTPException(status_code=422,detail='Invalid ID Format')
 
 @app.post("/actors", response_model=str)
 def create_actor(payload: ActorCreate, 
@@ -138,7 +138,8 @@ def delete_actor(
         return f"Actor {actor_id} deleted"
     except IntegrityError as e:
         raise HTTPException(status_code=400,detail="Can not delete, actor is foreign key in another table.") from e
-    
+    except DataError:
+        raise HTTPException(status_code=422,detail='Invalid ID Format')
 
 
 

@@ -10,13 +10,12 @@ class ActorService:
         return self.repo.get_all_actors()
     
     def get_actor_by_id(self, actor_id:str)->Actor:
-        try:
-            actor = self.repo.get_actor_by_id(actor_id)
-            if actor is None:
-                raise NotFoundException(f"Actor not Found. ID: {actor_id}")
-            return actor
-        except Exception:
-            raise
+
+        actor = self.repo.get_actor_by_id(actor_id)
+        if actor is None:
+            raise NotFoundException(f"Actor not Found. ID: {actor_id}")
+        return actor
+
 
     def add_actor(self, actor:Actor) -> str:
         if not isinstance(actor, Actor):
@@ -29,11 +28,19 @@ class ActorService:
         return self.repo.get_actor_by_name(query)
 
     def remove_actor_by_id(self, actor_id:str):
+        actor = self.repo.get_actor_by_id(actor_id)
+        if actor is None:
+            raise NotFoundException(f"Actor not Found. ID: {actor_id}")
+        
         if not isinstance(actor_id, str):
             raise TypeError("Expected str, got something else")
         self.repo.remove_actor_by_id(actor_id)
 
     def update_actor(self, actor:Actor):
+        actor = self.repo.get_actor_by_id(actor.actor_id)
+        if actor is None:
+            raise NotFoundException(f"Actor not Found. ID: {actor.actor_id}")
+        
         if not isinstance(actor, Actor):
             raise TypeError("Expected actor, got something else")
         self.repo.update_actor(actor)

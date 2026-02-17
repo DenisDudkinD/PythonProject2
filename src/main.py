@@ -30,7 +30,7 @@ from src.services.review_service import ReviewService
 from src.services.movie_analytics_service import MovieAnalyticsService
 from src.db.deps import get_db
 
-app = FastAPI(title="Book API")
+app = FastAPI(title="Movie API")
 
 
 def get_actor_repository(db: Session = Depends(get_db)) -> SQLActorRepository:
@@ -165,7 +165,7 @@ def get_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
     try:
         return svc.get_actor_by_id(actor_id)
     except NotFoundException as e:
-        raise HTTPException(status_code=500, detail="Actor Not Found") from e
+        raise HTTPException(status_code=404, detail="Actor Not Found") from e
     except ValueError as e:
         raise HTTPException(status_code=422, detail="Invalid ID Format") from e
 
@@ -328,7 +328,7 @@ def update_movie(
     data = payload.model_dump(exclude_unset=True)
 
     if not data:
-        raise HTTPException(status_code=400, detail="No fields provide to update")
+        raise HTTPException(status_code=400, detail="No fields provided to update")
 
     for k, v in data.items():
         setattr(movie, k, v)

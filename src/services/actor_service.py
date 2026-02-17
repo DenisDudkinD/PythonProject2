@@ -1,4 +1,3 @@
-from multiprocessing import Value
 from src.domain.actor import Actor
 from src.domain.exceptions import NotFoundException
 from src.repositories.actor_repository import ActorRepositoryProtocol

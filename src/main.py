@@ -30,7 +30,7 @@ from src.services.review_service import ReviewService
 from src.services.movie_analytics_service import MovieAnalyticsService
 from src.db.deps import get_db
 
-app = FastAPI(title="Movies API")
+app = FastAPI(title="Movie API")
 
 
 def get_actor_repository(db: Session = Depends(get_db)) -> SQLActorRepository:
@@ -338,7 +338,7 @@ def update_movie(
     data = payload.model_dump(exclude_unset=True)
 
     if not data:
-        raise HTTPException(status_code=400, detail="No fields provide to update")
+        raise HTTPException(status_code=400, detail="No fields provided to update")
 
     for k, v in data.items():
         setattr(movie, k, v)

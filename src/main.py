@@ -238,7 +238,7 @@ def get_studio(studio_id: str, svc: StudioService = Depends(get_studio_service))
     try:
         return svc.get_studio_by_id(studio_id)
     except NotFoundException as e:
-        raise HTTPException(status_code=500, detail="Studio Not Found") from e
+        raise HTTPException(status_code=404, detail="Studio Not Found") from e
     except DataError as e:
         raise HTTPException(status_code=400, detail="Invalid ID Provided") from e
 

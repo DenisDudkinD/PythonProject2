@@ -355,8 +355,8 @@ def update_review(
     for k, v in data.items():
         setattr(review, k, v)
 
-    updated = review_svc.get_review_by_id(review_id)
-    return updated
+    review_svc.update_review(review)
+    return review_svc.get_review_by_id(review_id)
 
 # Analytics Endpoints
 @app.get("/analytics/average_score")

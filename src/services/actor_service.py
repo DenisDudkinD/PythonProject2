@@ -43,6 +43,8 @@ class ActorService:
         self.repo.remove_actor_by_id(actor_id)
 
     def update_actor(self, actor:Actor):
+        if not isinstance(actor, Actor):
+            raise TypeError("Expected actor, got something else")
         try:
             uuid.UUID(actor.actor_id)
         except(ValueError) as e:

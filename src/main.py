@@ -16,7 +16,7 @@ from src.domain.cast import Cast
 from src.domain.studio import Studio
 from src.domain.review import Review
 from src.dto.actor import ActorRead, ActorCreate
-from src.dto.cast import CastRead, CastCreate, MovieCastRead
+from src.dto.cast import CastRead, CastCreate, MovieCastRead, ActorCastRead
 from src.dto.movie import MovieCreate, MovieRead, MovieUpdate
 from src.dto.review import ReviewCreate, ReviewRead, ReviewUpdate
 from src.domain.movie import Movie
@@ -32,52 +32,69 @@ from src.db.deps import get_db
 
 app = FastAPI(title="Book API")
 
+
 def get_actor_repository(db: Session = Depends(get_db)) -> SQLActorRepository:
     return SQLActorRepository(db)
 
-def get_actor_service(repo: SQLActorRepository = Depends(get_actor_repository)) -> ActorService:
+
+def get_actor_service(
+    repo: SQLActorRepository = Depends(get_actor_repository),
+) -> ActorService:
     return ActorService(repo)
+
 
 def get_cast_repository(db: Session = Depends(get_db)) -> SQLCastRepository:
     return SQLCastRepository(db)
 
-def get_cast_service(repo: SQLCastRepository = Depends(get_cast_repository)) -> CastService:
+
+def get_cast_service(
+    repo: SQLCastRepository = Depends(get_cast_repository),
+) -> CastService:
     return CastService(repo)
+
 
 def get_movie_repository(db: Session = Depends(get_db)) -> MovieRepository:
     return MovieRepository(db)
 
-def get_movie_service(repo: MovieRepository = Depends(get_movie_repository)) -> MovieService:
+
+def get_movie_service(
+    repo: MovieRepository = Depends(get_movie_repository),
+) -> MovieService:
     return MovieService(repo)
+
 
 def get_studio_repository(db: Session = Depends(get_db)) -> StudioRepository:
     return StudioRepository(db)
 
-def get_studio_service(repo: StudioRepository = Depends(get_studio_repository)) -> StudioService:
+
+def get_studio_service(
+    repo: StudioRepository = Depends(get_studio_repository),
+) -> StudioService:
     return StudioService(repo)
+
 
 def get_review_repository(db: Session = Depends(get_db)) -> ReviewRepository:
     return ReviewRepository(db)
 
-def get_review_service(repo: ReviewRepository = Depends(get_review_repository)) -> ReviewService:
+
+def get_review_service(
+    repo: ReviewRepository = Depends(get_review_repository),
+) -> ReviewService:
     return ReviewService(repo)
+
 
 def get_movie_analytics_service() -> MovieAnalyticsService:
     return MovieAnalyticsService()
 
+
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request:Request,exc:HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail":exc.detail}
-    )
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request:Request, exc: Exception):
-    return JSONResponse(
-        status_code = 500,
-        content={"detail":"Internal Server Error"}
-    )
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 
 @app.post("/generate")
@@ -96,84 +113,118 @@ def generate_seed_books(
     review_svc.add_seed_records(reviews)
     return "Records were added to DB......"
 
-#Actors endpoints
+
+# Actors endpoints
 @app.get("/actors", response_model=list[ActorRead])
 def list_actors(svc: ActorService = Depends(get_actor_service)):
     return svc.get_all_actors()
 
+
 @app.put("/actors/{actor_id}", response_model=ActorRead)
-def put_actor(actor_id:str, payload: ActorCreate, svc: ActorService = Depends(get_actor_service)):
+def put_actor(
+    actor_id: str, payload: ActorCreate, svc: ActorService = Depends(get_actor_service)
+):
     try:
         actor = Actor(**payload.model_dump())
         actor.actor_id = actor_id
         svc.update_actor(actor)
         return actor
     except ValueError as e:
-        raise HTTPException(status_code=422,detail='Invalid ID Format') from e
+        raise HTTPException(status_code=422, detail="Invalid ID Format") from e
     except Exception as e:
-        raise HTTPException(status_code=500,detail='Internal Server error') from e
+        raise HTTPException(status_code=500, detail="Internal Server error") from e
+
+
+@app.get("/actors/{actor_id}/cast")
+def get_actor_cast(
+    actor_id: str,
+    actor_svc: ActorService = Depends(get_actor_service),
+    cast_svc: CastService = Depends(get_cast_service),
+):
+    actor = actor_svc.get_actor_by_id(actor_id)
+    if actor is None:
+        raise HTTPException(status_code=404, detail="Actor not found")
+
+    rows = cast_svc.get_cast_by_actor(actor_id)
+
+    return [
+        ActorCastRead(
+            movie_id=m.movie_id,
+            actor_id=c.actor_id,
+            movie_name=m.title,
+            role_type=c.role_type,
+            character_name=c.character_name,
+            billing_order=c.billing_order,
+        )
+        for c, m in rows
+    ]
+
 
 @app.get("/actors/{actor_id}", response_model=ActorRead)
-def get_actor(actor_id:str, svc: ActorService = Depends(get_actor_service)):
+def get_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
     try:
         return svc.get_actor_by_id(actor_id)
     except NotFoundException as e:
-        raise HTTPException(status_code=500,detail='Actor Not Found') from e
+        raise HTTPException(status_code=500, detail="Actor Not Found") from e
     except ValueError as e:
-        raise HTTPException(status_code=422,detail='Invalid ID Format') from e
+        raise HTTPException(status_code=422, detail="Invalid ID Format") from e
+
 
 @app.post("/actors", response_model=str)
-def create_actor(payload: ActorCreate, 
-                svc: ActorService = Depends(get_actor_service)
-    ):
+def create_actor(payload: ActorCreate, svc: ActorService = Depends(get_actor_service)):
     actor = Actor(**payload.model_dump())
     actor_id = svc.add_actor(actor)
     return actor_id
 
+
 @app.delete("/actors/{actor_id}", response_model=str)
-def delete_actor( 
-    actor_id: str,
-    svc:ActorService = Depends(get_actor_service)
-    ):
+def delete_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
     try:
         svc.remove_actor_by_id(actor_id)
         return f"Actor {actor_id} deleted"
     except IntegrityError as e:
-        raise HTTPException(status_code=400,detail="Can not delete, actor is foreign key in another table.") from e
+        raise HTTPException(
+            status_code=400,
+            detail="Can not delete, actor is foreign key in another table.",
+        ) from e
     except ValueError as e:
-        raise HTTPException(status_code=422,detail='Invalid ID Format') from e
+        raise HTTPException(status_code=422, detail="Invalid ID Format") from e
 
 
-
-#Casts endpoints
+# Casts endpoints
 @app.get("/casts", response_model=list[CastRead])
 def list_casts(svc: CastService = Depends(get_cast_service)):
     return svc.get_all_casts()
 
+
 @app.post("/casts", response_model=str)
-def create_cast(payload: CastCreate, 
-                svc: CastService = Depends(get_cast_service)
-    ):
+def create_cast(payload: CastCreate, svc: CastService = Depends(get_cast_service)):
     cast = Cast(**payload.model_dump())
     svc.add_cast(cast)
     return "cast_created"
 
+
 @app.delete("/casts", response_model=str)
-def delete_cast( 
+def delete_cast(
     movie_id: str = Query(...),
     actor_id: str = Query(...),
-    svc:CastService = Depends(get_cast_service)
-    ):
+    svc: CastService = Depends(get_cast_service),
+):
     try:
-        svc.remove_cast(movie_id,actor_id)
+        svc.remove_cast(movie_id, actor_id)
         return f"cast {movie_id} and {actor_id} deleted"
     except IntegrityError as e:
-        raise HTTPException(status_code=400,detail="Can not delete, cast is foreign key in another table.") from e
+        raise HTTPException(
+            status_code=400,
+            detail="Can not delete, cast is foreign key in another table.",
+        ) from e
+
 
 # Studios endpoints
 @app.get("/studios", response_model=list[StudioRead])
 def list_studios(svc: StudioService = Depends(get_studio_service)):
     return svc.get_all_studios()
+
 
 @app.post("/studios", response_model=str)
 def add_studio(payload: StudioCreate, svc: StudioService = Depends(get_studio_service)):
@@ -181,36 +232,44 @@ def add_studio(payload: StudioCreate, svc: StudioService = Depends(get_studio_se
     studio_id = svc.add_studio(studio)
     return studio_id
 
+
 @app.get("/studios/{studio_id}", response_model=StudioRead)
-def get_studio(studio_id:str, svc: StudioService = Depends(get_studio_service)):
+def get_studio(studio_id: str, svc: StudioService = Depends(get_studio_service)):
     try:
         return svc.get_studio_by_id(studio_id)
     except NotFoundException as e:
-        raise HTTPException(status_code=500,detail='Studio Not Found') from e
+        raise HTTPException(status_code=500, detail="Studio Not Found") from e
     except DataError as e:
-        raise HTTPException(status_code=400,detail='Invalid ID Provided') from e
+        raise HTTPException(status_code=400, detail="Invalid ID Provided") from e
+
 
 @app.delete("/studios/{studio_id}", response_model=str)
-def delete_studio(
-    studio_id: str,
-    svc: StudioService = Depends(get_studio_service)
-    ):
-    try: 
+def delete_studio(studio_id: str, svc: StudioService = Depends(get_studio_service)):
+    try:
         svc.remove_studio_by_id(studio_id)
         return f"Studio deleted - id={studio_id}"
     except IntegrityError as e:
-        raise HTTPException(status_code=409,detail="Can not delete, studio is foreign key in another table.") from e
+        raise HTTPException(
+            status_code=409,
+            detail="Can not delete, studio is foreign key in another table.",
+        ) from e
     except NotFoundException as e:
-        raise HTTPException(status_code=404,detail='Studio Not Found') from e
+        raise HTTPException(status_code=404, detail="Studio Not Found") from e
     except DataError as e:
-        raise HTTPException(status_code=400,detail='Invalid ID Provided') from e
+        raise HTTPException(status_code=400, detail="Invalid ID Provided") from e
+
 
 @app.put("/studios/{studio_id}", response_model=StudioRead)
-def update_studio(studio_id:str, payload: StudioCreate, svc: StudioService = Depends(get_studio_service)):
+def update_studio(
+    studio_id: str,
+    payload: StudioCreate,
+    svc: StudioService = Depends(get_studio_service),
+):
     studio = Studio(**payload.model_dump())
-    studio.studio_id = studio_id # type: ignore
+    studio.studio_id = studio_id  # type: ignore
     svc.update_studio(studio_id, studio)
     return studio
+
 
 # Movies endpoints
 @app.post("/movies", response_model=str)
@@ -223,20 +282,25 @@ def create_movie(
         movie_id = movie_svc.add_movie(movie)
         return movie_id
     except IntegrityError as e:
-        raise HTTPException(status_code=409, detail="Database constraint violation while creating movie") from e
+        raise HTTPException(
+            status_code=409, detail="Database constraint violation while creating movie"
+        ) from e
+
 
 @app.get("/movies", response_model=list[MovieRead])
 def list_movies(movie_svc: MovieService = Depends(get_movie_service)):
     movies = movie_svc.get_all_movies()
     return movies
 
+
 @app.get("/movies/search", response_model=list[MovieRead])
 def search_movies(
     title: str = Query(..., min_length=1),
     movie_svc: MovieService = Depends(get_movie_service),
 ):
-    movies =  movie_svc.find_movies_by_title(title)
+    movies = movie_svc.find_movies_by_title(title)
     return movies
+
 
 @app.delete("/movies/{movie_id}")
 def delete_movie(
@@ -249,6 +313,7 @@ def delete_movie(
     except ValueError as e:
         raise HTTPException(status_code=404, detail="Movie not found") from e
 
+
 @app.patch("/movies/{movie_id}")
 def update_movie(
     movie_id: str,
@@ -259,7 +324,7 @@ def update_movie(
 
     if movie is None:
         raise HTTPException(status_code=404, detail="Movie not found")
-    
+
     data = payload.model_dump(exclude_unset=True)
 
     if not data:
@@ -271,6 +336,7 @@ def update_movie(
     db.commit()
     return f"Movie updated - id={movie_id}"
 
+
 @app.get("/movies/{movie_id}/cast")
 def get_movie_cast(
     movie_id: str,
@@ -280,7 +346,7 @@ def get_movie_cast(
     movie = movie_svc.get_movie_by_id(movie_id)
     if movie is None:
         raise HTTPException(status_code=404, detail="Movie not found")
-    
+
     rows = cast_svc.get_cast_by_movie(movie_id)
 
     return [
@@ -295,51 +361,55 @@ def get_movie_cast(
         for c, a in rows
     ]
 
+
 # Review endpoints
 @app.post("/reviews", response_model=str)
 def create_review(
     payload: ReviewCreate,
     review_svc: ReviewService = Depends(get_review_service),
-    movie_svc: MovieService = Depends(get_movie_service)
+    movie_svc: MovieService = Depends(get_movie_service),
 ):
     if movie_svc.get_movie_by_id(str(payload.movie_id)) is None:
         raise HTTPException(status_code=404, detail="Movie not found")
-    
+
     review = Review(**payload.model_dump())
     try:
         review_svc.add_review(review)
     except Exception as e:
         raise HTTPException(status_code=409, detail="Could not create review") from e
-    
+
     return review.review_id
+
 
 @app.get("/reviews", response_model=list[ReviewRead])
 def all_reviews(review_svc: ReviewService = Depends(get_review_service)):
     reviews = review_svc.get_all_reviews()
     return reviews
 
+
 @app.get("/movies/{movie_id}/reviews", response_model=list[ReviewRead])
 def reviews_by_movie(
     movie_id: str,
     review_svc: ReviewService = Depends(get_review_service),
-    movie_svc: MovieService = Depends(get_movie_service)
+    movie_svc: MovieService = Depends(get_movie_service),
 ):
     if movie_svc.get_movie_by_id(movie_id) is None:
         raise HTTPException(status_code=404, detail="Movie not found")
-    
+
     reviews = review_svc.get_reviews_by_movie(movie_id)
     return reviews
 
+
 @app.delete("/reviews/{review_id}")
 def delete_review(
-    review_id: str,
-    review_svc: ReviewService = Depends(get_review_service)
+    review_id: str, review_svc: ReviewService = Depends(get_review_service)
 ):
     try:
         review_svc.delete_review(review_id)
         return f"Successfully deleted review with ID '{review_id}'"
     except ValueError as e:
         raise HTTPException(status_code=404, detail="Review not found") from e
+
 
 @app.patch("/reviews/{review_id}", response_model=ReviewRead)
 def update_review(
@@ -350,16 +420,17 @@ def update_review(
     review = review_svc.get_review_by_id(review_id)
     if review is None:
         raise HTTPException(status_code=404, detail="Review not found")
-    
+
     data = payload.model_dump(exclude_unset=True)
     if not data:
         raise HTTPException(status_code=400, detail="No fields provided to update")
-    
+
     for k, v in data.items():
         setattr(review, k, v)
 
     review_svc.update_review(review)
     return review_svc.get_review_by_id(review_id)
+
 
 # Analytics Endpoints
 @app.get("/analytics/average_score")
@@ -372,6 +443,7 @@ def average_review_score(
         return {"average_score": None}
     return {"average_score": analytics.average_review_score(reviews)}
 
+
 @app.get("/analytics/average_revenue")
 def average_revenue(
     analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
@@ -381,6 +453,7 @@ def average_revenue(
     if not movies:
         return {"average_revenue": None}
     return {"average_revenue": analytics.average_revenue(movies)}
+
 
 @app.get("/analytics/average_revenue_by_rating")
 def average_revenue_by_rating(
@@ -392,6 +465,7 @@ def average_revenue_by_rating(
         return {"average_revenue_by_rating": None}
     return analytics.average_revenue_by_rating(movies)
 
+
 @app.get("/analytics/cast_sizes")
 def cast_sizes(
     analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
@@ -402,6 +476,7 @@ def cast_sizes(
     casts = cast_svc.get_all_casts()
     return analytics.cast_size_by_movie(movies, casts)
 
+
 @app.get("/analytics/actors_by_number_of_roles")
 def actors_by_number_of_roles(
     analytics: MovieAnalyticsService = Depends(get_movie_analytics_service),
@@ -411,6 +486,7 @@ def actors_by_number_of_roles(
     actors = actor_svc.get_all_actors()
     casts = cast_svc.get_all_casts()
     return analytics.actors_by_number_of_roles(actors, casts)
+
 
 @app.get("/analytics/studios_average_scores")
 def studios_average_scores(

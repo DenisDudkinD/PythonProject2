@@ -22,6 +22,11 @@ class CastService:
             raise TypeError("Expected str, got something else.")
         return self.repo.get_cast_by_movie(movie_id)
 
+    def get_cast_by_actor(self, actor_id: str):
+        if not isinstance(actor_id, str):
+            raise TypeError("Expected str, got something else.")
+        return self.repo.get_cast_by_actor(actor_id)
+    
     def remove_cast(self, movie_id: str, actor_id: str):
         self.repo.remove_cast(movie_id, actor_id)
 

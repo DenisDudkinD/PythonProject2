@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from src.domain.cast import Cast
 from src.domain.actor import Actor
+from src.domain.movie import Movie
 from src.repositories.cast_repository_protocol import CastRepositoryProtocol
 
 class SQLCastRepository(CastRepositoryProtocol):
@@ -22,6 +23,16 @@ class SQLCastRepository(CastRepositoryProtocol):
             self.session.query(Cast, Actor)
             .join(Actor, Cast.actor_id == Actor.actor_id)
             .filter(Cast.movie_id == movie_id)
+            .order_by(Cast.billing_order.asc())
+            .all()
+        )
+        return rows
+    
+    def get_cast_by_actor(self,actor_id:str) -> list[tuple[Cast, Actor]]:
+        rows = (
+            self.session.query(Cast, Movie)
+            .join(Movie, Cast.movie_id == Movie.movie_id)
+            .filter(Cast.actor_id == actor_id)
             .order_by(Cast.billing_order.asc())
             .all()
         )

@@ -27,6 +27,9 @@ class MovieRepository(MovieRepositoryProtocol):
         self.session.commit()
 
     def update_movie(self, movie: Movie) -> None:
+        existing = self.session.get(Movie, movie.movie_id)
+        if existing is None:
+            raise ValueError(f"Movie with id '{movie.movie_id}' not found.")
         self.session.merge(movie)
         self.session.commit()
 

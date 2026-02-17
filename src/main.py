@@ -18,7 +18,7 @@ from src.domain.review import Review
 from src.dto.actor import ActorRead, ActorCreate
 from src.dto.cast import CastRead, CastCreate, MovieCastRead
 from src.dto.movie import MovieCreate, MovieRead, MovieUpdate
-from src.dto.review import ReviewCreate, ReviewRead
+from src.dto.review import ReviewCreate, ReviewRead, ReviewUpdate
 from src.domain.movie import Movie
 from src.dto.studio import StudioRead, StudioCreate
 from src.services.actor_service import ActorService
@@ -299,10 +299,18 @@ def get_movie_cast(
 @app.post("/reviews", response_model=str)
 def create_review(
     payload: ReviewCreate,
-    review_svc: ReviewService = Depends(get_review_service)
+    review_svc: ReviewService = Depends(get_review_service),
+    movie_svc: MovieService = Depends(get_movie_service)
 ):
+    if movie_svc.get_movie_by_id(str(payload.movie_id)) is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    
     review = Review(**payload.model_dump())
-    review_svc.add_review(review)
+    try:
+        review_svc.add_review(review)
+    except Exception as e:
+        raise HTTPException(status_code=409, detail="Could not create review") from e
+    
     return review.review_id
 
 @app.get("/reviews", response_model=list[ReviewRead])
@@ -313,8 +321,12 @@ def all_reviews(review_svc: ReviewService = Depends(get_review_service)):
 @app.get("/movies/{movie_id}/reviews", response_model=list[ReviewRead])
 def reviews_by_movie(
     movie_id: str,
-    review_svc: ReviewService = Depends(get_review_service)
+    review_svc: ReviewService = Depends(get_review_service),
+    movie_svc: MovieService = Depends(get_movie_service)
 ):
+    if movie_svc.get_movie_by_id(movie_id) is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    
     reviews = review_svc.get_reviews_by_movie(movie_id)
     return reviews
 
@@ -323,19 +335,31 @@ def delete_review(
     review_id: str,
     review_svc: ReviewService = Depends(get_review_service)
 ):
-    review_svc.delete_review(review_id)
-    return f"Successfully deleted review with ID '{review_id}'"
+    try:
+        review_svc.delete_review(review_id)
+        return f"Successfully deleted review with ID '{review_id}'"
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail="Review not found") from e
 
 @app.patch("/reviews/{review_id}", response_model=ReviewRead)
 def update_review(
     review_id: str,
-    payload: ActorCreate,
-    review_svc: ReviewService = Depends(get_review_service)
+    payload: ReviewUpdate,
+    review_svc: ReviewService = Depends(get_review_service),
 ):
-    review = Review(**payload.model_dump())
-    review.review_id = review_id # type: ignore
+    review = review_svc.get_review_by_id(review_id)
+    if review is None:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    data = payload.model_dump(exclude_unset=True)
+    if not data:
+        raise HTTPException(status_code=400, detail="No fields provided to update")
+    
+    for k, v in data.items():
+        setattr(review, k, v)
+
     review_svc.update_review(review)
-    return review
+    return review_svc.get_review_by_id(review_id)
 
 # Analytics Endpoints
 @app.get("/analytics/average_score")

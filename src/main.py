@@ -108,17 +108,17 @@ def put_actor(actor_id:str, payload: ActorCreate, svc: ActorService = Depends(ge
         actor.actor_id = actor_id
         svc.update_actor(actor)
         return actor
-    except Exception:
-        raise HTTPException(status_code=500,detail='Internal Server error')
+    except Exception as e:
+        raise HTTPException(status_code=500,detail='Internal Server error') from e
 
 @app.get("/actors/{actor_id}", response_model=ActorRead)
 def get_actor(actor_id:str, svc: ActorService = Depends(get_actor_service)):
     try:
         return svc.get_actor_by_id(actor_id)
-    except NotFoundException:
-        raise HTTPException(status_code=500,detail='Actor Not Found')
-    except DataError:
-        raise HTTPException(status_code=422,detail='Invalid ID Format')
+    except NotFoundException as e:
+        raise HTTPException(status_code=500,detail='Actor Not Found') from e
+    except DataError as e:
+        raise HTTPException(status_code=422,detail='Invalid ID Format') from e
 
 @app.post("/actors", response_model=str)
 def create_actor(payload: ActorCreate, 
@@ -139,7 +139,7 @@ def delete_actor(
     except IntegrityError as e:
         raise HTTPException(status_code=400,detail="Can not delete, actor is foreign key in another table.") from e
     except DataError:
-        raise HTTPException(status_code=422,detail='Invalid ID Format')
+        raise HTTPException(status_code=422,detail='Invalid ID Format') from e
 
 
 
@@ -183,10 +183,10 @@ def add_studio(payload: StudioCreate, svc: StudioService = Depends(get_studio_se
 def get_studio(studio_id:str, svc: StudioService = Depends(get_studio_service)):
     try:
         return svc.get_studio_by_id(studio_id)
-    except NotFoundException:
-        raise HTTPException(status_code=500,detail='Studio Not Found')
-    except DataError:
-        raise HTTPException(status_code=400,detail='Invalid ID Provided')
+    except NotFoundException as e:
+        raise HTTPException(status_code=500,detail='Studio Not Found') from e
+    except DataError as e:
+        raise HTTPException(status_code=400,detail='Invalid ID Provided') from e
 
 @app.delete("/studios/{studio_id}", response_model=str)
 def delete_studio(
@@ -197,11 +197,11 @@ def delete_studio(
         svc.remove_studio_by_id(studio_id)
         return f"Studio deleted - id={studio_id}"
     except IntegrityError as e:
-        raise HTTPException(status_code=400,detail="Can not delete, studio is foreign key in another table.") from e
-    except NotFoundException:
-        raise HTTPException(status_code=500,detail='Studio Not Found')
-    except DataError:
-        raise HTTPException(status_code=400,detail='Invalid ID Provided')
+        raise HTTPException(status_code=409,detail="Can not delete, studio is foreign key in another table.") from e
+    except NotFoundException as e:
+        raise HTTPException(status_code=404,detail='Studio Not Found') from e
+    except DataError as e:
+        raise HTTPException(status_code=400,detail='Invalid ID Provided') from e
 
 @app.put("/studios/{studio_id}", response_model=StudioRead)
 def update_studio(studio_id:str, payload: StudioCreate, svc: StudioService = Depends(get_studio_service)):

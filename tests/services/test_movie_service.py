@@ -5,8 +5,6 @@ from src.domain.movie import Movie
 from tests.mocks.mock_movie_repository import MockMovieRepo
 
 def make_movie(**overrides):
-    # Create a minimal Movie object for your service tests.
-    # Adjust fields to match your domain Movie constructor if needed.
     data = dict(
         movie_id="new_movie_id",
         studio_id="studio_mock_id",
@@ -15,8 +13,8 @@ def make_movie(**overrides):
         runtime_minutes=100,
         rating="PG",
         sequel_to_movie_id=None,
-        production_cost=1000,
-        revenue=2000,
+        production_cost=100000,
+        revenue=200000,
     )
     data.update(overrides)
     return Movie(**data)
@@ -24,7 +22,6 @@ def make_movie(**overrides):
 def test_add_movie_returns_id():
     svc = MovieService(MockMovieRepo())
     movie = make_movie(movie_id="abc123")
-
     movie_id = svc.add_movie(movie)
 
     assert movie_id == "abc123"
@@ -37,7 +34,6 @@ def test_add_movie_type_check():
 
 def test_get_all_movies_returns_list():
     svc = MovieService(MockMovieRepo())
-
     movies = svc.get_all_movies()
 
     assert isinstance(movies, list)
@@ -64,7 +60,6 @@ def test_find_movies_by_title_type_check():
 
 def test_get_movie_by_id_positive():
     svc = MovieService(MockMovieRepo())
-
     movie = svc.get_movie_by_id("mock_id")
 
     assert movie is not None
@@ -78,7 +73,6 @@ def test_get_movie_by_id_type_check():
 
 def test_remove_movie_positive():
     svc = MovieService(MockMovieRepo())
-
     svc.remove_movie("mock_id")
 
     assert svc.get_movie_by_id("mock_id") is None
@@ -91,17 +85,16 @@ def test_remove_movie_negative():
 
 def test_update_movie_positive():
     svc = MovieService(MockMovieRepo())
-
     updated = make_movie(movie_id="mock_id", title="Updated Title")
     svc.update_movie(updated)
-
     movie = svc.get_movie_by_id("mock_id")
+
     assert movie is not None
     assert movie.title == "Updated Title"
 
 def test_update_movie_negative():
     svc = MovieService(MockMovieRepo())
-
     updated = make_movie(movie_id="missing_id", title="Updated Title")
+
     with pytest.raises(ValueError):
         svc.update_movie(updated)

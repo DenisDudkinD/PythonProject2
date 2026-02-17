@@ -11,6 +11,9 @@ class ReviewRepositoryProtocol(Protocol):
 
     def get_reviews_by_movie(self, movie_id: str) -> list[Review]:
         ...
+
+    def get_review_by_id(self, review_id: str) -> Review | None:
+        ...
     
     def update_review(self, review: Review) -> None:
         ...

@@ -21,6 +21,13 @@ class ReviewService:
             raise ValueError("Query cannot be empty.")
         return self.repo.get_reviews_by_movie(movie_id)
     
+    def get_review_by_id(self, review_id: str) -> Review | None:
+        if not isinstance(review_id, str):
+            raise TypeError("Expected String, got something else.")
+        if not review_id.strip():
+            raise ValueError("review_id cannot be empty.")
+        return self.repo.get_review_by_id(review_id)
+    
     def update_review(self, review: Review) -> None:
         if not isinstance(review, Review):
             raise TypeError("Expected Review, got something else.")

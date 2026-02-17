@@ -18,7 +18,13 @@ class ReviewRepository(ReviewRepositoryProtocol):
     def get_reviews_by_movie(self, movie_id: str) -> list[Review]:
         return self.session.query(Review).filter(Review.movie_id == movie_id).all()
     
+    def get_review_by_id(self, review_id: str) -> Review | None:
+        return self.session.get(Review, review_id)
+    
     def update_review(self, review: Review) -> None:
+        existing = self.session.get(Review, review.review_id)
+        if existing is None:
+            raise ValueError(f"Review with id '{review.review_id}' not found.")
         self.session.merge(review)
         self.session.commit()
 

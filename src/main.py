@@ -108,6 +108,8 @@ def put_actor(actor_id:str, payload: ActorCreate, svc: ActorService = Depends(ge
         actor.actor_id = actor_id
         svc.update_actor(actor)
         return actor
+    except ValueError as e:
+        raise HTTPException(status_code=422,detail='Invalid ID Format') from e
     except Exception as e:
         raise HTTPException(status_code=500,detail='Internal Server error') from e
 
@@ -117,7 +119,7 @@ def get_actor(actor_id:str, svc: ActorService = Depends(get_actor_service)):
         return svc.get_actor_by_id(actor_id)
     except NotFoundException as e:
         raise HTTPException(status_code=500,detail='Actor Not Found') from e
-    except DataError as e:
+    except ValueError as e:
         raise HTTPException(status_code=422,detail='Invalid ID Format') from e
 
 @app.post("/actors", response_model=str)
@@ -138,7 +140,7 @@ def delete_actor(
         return f"Actor {actor_id} deleted"
     except IntegrityError as e:
         raise HTTPException(status_code=400,detail="Can not delete, actor is foreign key in another table.") from e
-    except DataError:
+    except ValueError as e:
         raise HTTPException(status_code=422,detail='Invalid ID Format') from e
 
 

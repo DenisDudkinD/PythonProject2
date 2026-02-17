@@ -15,6 +15,9 @@ class StudioRepository(StudioRepositoryProtocol):
     def get_all_studios(self) -> list[Studio]:
         return self.session.query(Studio).all()
 
+    def get_studio_by_id(self, studio_id: str) -> Studio:
+        return self.session.get(Studio, studio_id)
+
     def get_studio_by_name(self, query: str) -> list[Studio]:
         return self.session.query(Studio).filter(Studio.name == query).all()
 

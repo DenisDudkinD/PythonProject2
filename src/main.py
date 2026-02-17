@@ -179,9 +179,18 @@ def add_studio(payload: StudioCreate, svc: StudioService = Depends(get_studio_se
     studio_id = svc.add_studio(studio)
     return studio_id
 
-@app.delete("/studios", response_model=str)
+@app.get("/studios/{studio_id}", response_model=StudioRead)
+def get_studio(studio_id:str, svc: StudioService = Depends(get_studio_service)):
+    try:
+        return svc.get_studio_by_id(studio_id)
+    except NotFoundException:
+        raise HTTPException(status_code=500,detail='Studio Not Found')
+    except DataError:
+        raise HTTPException(status_code=400,detail='Invalid ID Provided')
+
+@app.delete("/studios/{studio_id}", response_model=str)
 def delete_studio(
-    studio_id: str = Query(...),
+    studio_id: str,
     svc: StudioService = Depends(get_studio_service)
     ):
     try: 
@@ -189,6 +198,10 @@ def delete_studio(
         return f"Studio deleted - id={studio_id}"
     except IntegrityError as e:
         raise HTTPException(status_code=400,detail="Can not delete, studio is foreign key in another table.") from e
+    except NotFoundException:
+        raise HTTPException(status_code=500,detail='Studio Not Found')
+    except DataError:
+        raise HTTPException(status_code=400,detail='Invalid ID Provided')
 
 @app.put("/studios/{studio_id}", response_model=StudioRead)
 def update_studio(studio_id:str, payload: StudioCreate, svc: StudioService = Depends(get_studio_service)):

@@ -25,3 +25,7 @@ class MovieCastRead(BaseModel):
     role_type: str
     character_name: str
     billing_order: int
+
+
+class ActorCastRead(CastRead):
+    movie_name: str

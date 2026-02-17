@@ -30,7 +30,7 @@ from src.services.review_service import ReviewService
 from src.services.movie_analytics_service import MovieAnalyticsService
 from src.db.deps import get_db
 
-app = FastAPI(title="Book API")
+app = FastAPI(title="Movies API")
 
 
 def get_actor_repository(db: Session = Depends(get_db)) -> SQLActorRepository:
@@ -141,24 +141,28 @@ def get_actor_cast(
     actor_svc: ActorService = Depends(get_actor_service),
     cast_svc: CastService = Depends(get_cast_service),
 ):
-    actor = actor_svc.get_actor_by_id(actor_id)
-    if actor is None:
-        raise HTTPException(status_code=404, detail="Actor not found")
+    try:
+        actor = actor_svc.get_actor_by_id(actor_id)
+        if actor is None:
+            raise HTTPException(status_code=404, detail="Actor not found")
 
-    rows = cast_svc.get_cast_by_actor(actor_id)
+        rows = cast_svc.get_cast_by_actor(actor_id)
 
-    return [
-        ActorCastRead(
-            movie_id=m.movie_id,
-            actor_id=c.actor_id,
-            movie_name=m.title,
-            role_type=c.role_type,
-            character_name=c.character_name,
-            billing_order=c.billing_order,
-        )
-        for c, m in rows
+        return [
+            ActorCastRead(
+                movie_id=m.movie_id,
+                actor_id=c.actor_id,
+                movie_name=m.title,
+                role_type=c.role_type,
+                character_name=c.character_name,
+                billing_order=c.billing_order,
+            )
+            for c, m in rows
     ]
-
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail="Invalid ID Format") from e
+    except NotFoundException as e:
+        raise HTTPException(status_code=500, detail="Actor Not Found") from e
 
 @app.get("/actors/{actor_id}", response_model=ActorRead)
 def get_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
@@ -213,6 +217,8 @@ def delete_cast(
     try:
         svc.remove_cast(movie_id, actor_id)
         return f"cast {movie_id} and {actor_id} deleted"
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail="Invalid ID Format") from e
     except IntegrityError as e:
         raise HTTPException(
             status_code=400,

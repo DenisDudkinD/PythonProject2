@@ -1,6 +1,6 @@
 from src.domain.cast import Cast
 from src.repositories.cast_repository_protocol import CastRepositoryProtocol
-
+import uuid
 
 class CastService:
     def __init__(self, repo: CastRepositoryProtocol):
@@ -15,14 +15,27 @@ class CastService:
         self.repo.add_cast(cast)
 
     def get_cast(self, movie_id: str, actor_id: str):
+        try:
+            uuid.UUID(actor_id)
+            uuid.UUID(movie_id)
+        except(ValueError) as e:
+            raise ValueError("Invalid ID format") from e
         return self.repo.get_specific_cast(movie_id, actor_id)
 
     def get_cast_by_movie(self, movie_id: str):
+        try:
+            uuid.UUID(movie_id)
+        except(ValueError) as e:
+            raise ValueError("Invalid ID format") from e
         if not isinstance(movie_id, str):
             raise TypeError("Expected str, got something else.")
         return self.repo.get_cast_by_movie(movie_id)
 
     def get_cast_by_actor(self, actor_id: str):
+        try:
+            uuid.UUID(actor_id)
+        except(ValueError) as e:
+            raise ValueError("Invalid ID format") from e
         if not isinstance(actor_id, str):
             raise TypeError("Expected str, got something else.")
         return self.repo.get_cast_by_actor(actor_id)
@@ -31,6 +44,11 @@ class CastService:
         self.repo.remove_cast(movie_id, actor_id)
 
     def update_cast(self, cast: Cast):
+        try:
+            uuid.UUID(cast.actor_id)
+            uuid.UUID(cast.movie_id)
+        except(ValueError) as e:
+            raise ValueError("Invalid ID format") from e
         if not isinstance(cast, Cast):
             raise TypeError("Expected cast, got something else")
         self.repo.update_cast(cast)

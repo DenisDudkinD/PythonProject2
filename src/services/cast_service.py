@@ -1,4 +1,5 @@
 from src.domain.cast import Cast
+from src.domain.exceptions import NotFoundException
 from src.repositories.cast_repository_protocol import CastRepositoryProtocol
 import uuid
 
@@ -41,6 +42,14 @@ class CastService:
         return self.repo.get_cast_by_actor(actor_id)
     
     def remove_cast(self, movie_id: str, actor_id: str):
+        try:
+            uuid.UUID(actor_id)
+            uuid.UUID(movie_id)
+        except(ValueError) as e:
+            raise ValueError("Invalid ID format") from e
+        cast = self.repo.get_specific_cast(movie_id,actor_id)
+        if cast is None:
+            raise NotFoundException('Cast Not Found')
         self.repo.remove_cast(movie_id, actor_id)
 
     def update_cast(self, cast: Cast):

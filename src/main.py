@@ -162,14 +162,14 @@ def get_actor_cast(
     except ValueError as e:
         raise HTTPException(status_code=422, detail="Invalid ID Format") from e
     except NotFoundException as e:
-        raise HTTPException(status_code=500, detail="Actor Not Found") from e
+        raise HTTPException(status_code=404, detail="Actor Not Found") from e
 
 @app.get("/actors/{actor_id}", response_model=ActorRead)
 def get_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
     try:
         return svc.get_actor_by_id(actor_id)
     except NotFoundException as e:
-        raise HTTPException(status_code=500, detail="Actor Not Found") from e
+        raise HTTPException(status_code=404, detail="Actor Not Found") from e
     except ValueError as e:
         raise HTTPException(status_code=422, detail="Invalid ID Format") from e
 
@@ -193,6 +193,8 @@ def delete_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
         ) from e
     except ValueError as e:
         raise HTTPException(status_code=422, detail="Invalid ID Format") from e
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail="Actor not found") from e
 
 
 # Casts endpoints
@@ -219,6 +221,8 @@ def delete_cast(
         return f"cast {movie_id} and {actor_id} deleted"
     except ValueError as e:
         raise HTTPException(status_code=422, detail="Invalid ID Format") from e
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail="Cast Not Found") from e
     except IntegrityError as e:
         raise HTTPException(
             status_code=400,
@@ -244,7 +248,7 @@ def get_studio(studio_id: str, svc: StudioService = Depends(get_studio_service))
     try:
         return svc.get_studio_by_id(studio_id)
     except NotFoundException as e:
-        raise HTTPException(status_code=500, detail="Studio Not Found") from e
+        raise HTTPException(status_code=404, detail="Studio Not Found") from e
     except DataError as e:
         raise HTTPException(status_code=400, detail="Invalid ID Provided") from e
 

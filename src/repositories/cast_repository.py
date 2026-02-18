@@ -40,8 +40,6 @@ class SQLCastRepository(CastRepositoryProtocol):
     
     def remove_cast(self,movie_id:str,actor_id:str) -> None:
         cast = self.session.get(Cast,(movie_id, actor_id))
-        if cast is None:
-            raise ValueError("Cast Not Found")
         self.session.delete(cast)
         self.session.commit()
 

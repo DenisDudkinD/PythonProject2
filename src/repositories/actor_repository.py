@@ -23,8 +23,6 @@ class SQLActorRepository(ActorRepositoryProtocol):
 
     def remove_actor_by_id(self,actor_id:str)-> str:
         actor = self.session.get(Actor,actor_id)
-        if actor is None:
-            raise ValueError("Actor Not Found")
         self.session.delete(actor)
         self.session.commit()
         return actor.actor_id

@@ -198,10 +198,19 @@ def delete_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
 
 
 # Casts endpoints
-@app.get("/casts", response_model=list[CastRead])
-def list_casts(svc: CastService = Depends(get_cast_service)):
-    return svc.get_all_casts()
 
+@app.get("/casts", response_model=list[CastRead])
+def delete_cast(
+    movie_id: str | None = Query(default = None),
+    actor_id: str | None= Query(default = None),
+    svc: CastService = Depends(get_cast_service),
+):
+    try:
+        return svc.get_cast(movie_id, actor_id)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail="Invalid ID Format") from e
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail="Cast Not Found") from e
 
 @app.post("/casts", response_model=str)
 def create_cast(payload: CastCreate, svc: CastService = Depends(get_cast_service)):

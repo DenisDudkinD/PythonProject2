@@ -15,13 +15,20 @@ class CastService:
             raise TypeError("Expected cast, got something else")
         self.repo.add_cast(cast)
 
-    def get_cast(self, movie_id: str, actor_id: str):
-        try:
-            uuid.UUID(actor_id)
-            uuid.UUID(movie_id)
-        except(ValueError) as e:
-            raise ValueError("Invalid ID format") from e
-        return self.repo.get_specific_cast(movie_id, actor_id)
+    
+    def get_cast(self,movie_id : str = None, actor_id:str = None) -> list[Cast]:
+        if movie_id and actor_id:
+            try:
+                 uuid.UUID(actor_id)
+                 uuid.UUID(movie_id)
+                 cast = self.repo.get_specific_cast(movie_id,actor_id)
+                 if cast is None:
+                     raise (NotFoundException("Cast Not Found"))
+                 return [cast]
+            except(ValueError) as e:
+               raise ValueError("Invalid ID format") from e
+        else:
+            return self.repo.get_all_casts()
 
     def get_cast_by_movie(self, movie_id: str):
         try:

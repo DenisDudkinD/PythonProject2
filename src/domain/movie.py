@@ -2,6 +2,7 @@ import uuid
 from datetime import date
 from sqlalchemy import CheckConstraint, Column, String, Date, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from src.base import Base
 
 class Movie(Base):
@@ -24,3 +25,5 @@ class Movie(Base):
 
     sequel_to_movie_id = Column(UUID(as_uuid=True),ForeignKey("movies.movie_id"), nullable=True)
 
+    studio = relationship("Studio", backref="movies")
+    sequel_to = relationship("Movie", remote_side=[movie_id], backref="sequels")

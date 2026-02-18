@@ -22,3 +22,8 @@ class ReviewRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ReviewUpdate(BaseModel):
+    reviewer_name: str
+    score: int
+    review_text: str

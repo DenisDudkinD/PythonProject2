@@ -21,17 +21,17 @@ class SQLActorRepository(ActorRepositoryProtocol):
     def get_actor_by_id(self,actor_id:str)-> Actor:
         return self.session.get(Actor,actor_id)
 
-    def remove_actor_by_id(self,actor_id:str)-> None:
+    def remove_actor_by_id(self,actor_id:str)-> str:
         actor = self.session.get(Actor,actor_id)
-        if actor is None:
-            raise ValueError("Actor Not Found")
         self.session.delete(actor)
         self.session.commit()
+        return actor.actor_id
 
-    def update_actor(self,actor:Actor)-> None:
-        self.session.merge(actor)
+    def update_actor(self,actor:Actor)-> str:
+        updated_actor = self.session.merge(actor)
         self.session.commit()
-
+        return updated_actor.actor_id
+    
     def add_seed_records(self, actors: list[Actor]) -> None:
         for a in actors:
             self.session.add(a)

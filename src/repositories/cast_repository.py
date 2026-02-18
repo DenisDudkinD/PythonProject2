@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from src.domain.cast import Cast
 from src.domain.actor import Actor
+from src.domain.movie import Movie
 from src.repositories.cast_repository_protocol import CastRepositoryProtocol
 
 class SQLCastRepository(CastRepositoryProtocol):
@@ -27,10 +28,18 @@ class SQLCastRepository(CastRepositoryProtocol):
         )
         return rows
     
+    def get_cast_by_actor(self,actor_id:str) -> list[tuple[Cast, Actor]]:
+        rows = (
+            self.session.query(Cast, Movie)
+            .join(Movie, Cast.movie_id == Movie.movie_id)
+            .filter(Cast.actor_id == actor_id)
+            .order_by(Cast.billing_order.asc())
+            .all()
+        )
+        return rows
+    
     def remove_cast(self,movie_id:str,actor_id:str) -> None:
         cast = self.session.get(Cast,(movie_id, actor_id))
-        if cast is None:
-            raise ValueError("Cast Not Found")
         self.session.delete(cast)
         self.session.commit()
 

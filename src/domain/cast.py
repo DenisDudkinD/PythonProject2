@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from src.base import Base
+from sqlalchemy.orm import relationship
 
 class Cast(Base):
     __tablename__ = "movie_cast"

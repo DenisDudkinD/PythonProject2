@@ -4,6 +4,7 @@ from sqlalchemy import Column, String, DateTime, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from src.base import Base
+from sqlalchemy.orm import relationship
 
 class Review(Base):
     __tablename__ = "reviews"

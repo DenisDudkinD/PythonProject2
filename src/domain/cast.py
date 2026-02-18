@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from src.base import Base
 
 class Cast(Base):
@@ -12,3 +13,5 @@ class Cast(Base):
     character_name = Column(String, nullable=False)
     billing_order = Column(Integer,nullable=False)
 
+    movie = relationship("Movie", backref="cast_members")
+    actor = relationship("Actor", backref="cast_roles")

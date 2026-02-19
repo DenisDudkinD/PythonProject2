@@ -321,6 +321,22 @@ def search_movies(
     return movies
 
 
+@app.get("/movies/{movie_id}", response_model=MovieRead)
+def get_movie(
+    movie_id: str,
+    movie_svc: MovieService = Depends(get_movie_service),
+):
+    try:
+        movie = movie_svc.get_movie_by_id(movie_id)
+
+        if movie is None:
+            raise HTTPException(status_code=404, detail="Movie not found")
+        return movie
+    
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail="Invalid ID format") from e
+
+
 @app.delete("/movies/{movie_id}")
 def delete_movie(
     movie_id: str,

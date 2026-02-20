@@ -200,7 +200,7 @@ def delete_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
 # Casts endpoints
 
 @app.get("/casts", response_model=list[CastRead])
-def delete_cast(
+def get_cast(
     movie_id: str | None = Query(default = None),
     actor_id: str | None= Query(default = None),
     svc: CastService = Depends(get_cast_service),

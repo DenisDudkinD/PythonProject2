@@ -200,7 +200,7 @@ def delete_actor(actor_id: str, svc: ActorService = Depends(get_actor_service)):
 # Casts endpoints
 
 @app.get("/casts", response_model=list[CastRead])
-def delete_cast(
+def get_cast(
     movie_id: str | None = Query(default = None),
     actor_id: str | None= Query(default = None),
     svc: CastService = Depends(get_cast_service),
@@ -319,6 +319,22 @@ def search_movies(
 ):
     movies = movie_svc.find_movies_by_title(title)
     return movies
+
+
+@app.get("/movies/{movie_id}", response_model=MovieRead)
+def get_movie(
+    movie_id: str,
+    movie_svc: MovieService = Depends(get_movie_service),
+):
+    try:
+        movie = movie_svc.get_movie_by_id(movie_id)
+
+        if movie is None:
+            raise HTTPException(status_code=404, detail="Movie not found")
+        return movie
+    
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail="Invalid ID format") from e
 
 
 @app.delete("/movies/{movie_id}")
